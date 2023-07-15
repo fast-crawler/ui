@@ -1,0 +1,97 @@
+@for $i from 1 through 96 {
+  $m: 4px * $i;
+  .m-#{$i} {
+    margin: $m !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $mb: 4px * $i;
+  .mb-#{$i} {
+    margin-bottom: $mb !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $mt: 4px * $i;
+  .mt-#{$i} {
+    margin-top: $mt !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $ml: 4px * $i;
+  .ml-#{$i} {
+    margin-left: $ml !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $mr: 4px * $i;
+  .mr-#{$i} {
+    margin-right: $mr !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $mx: 4px * $i;
+  .mx-#{$i} {
+    margin-inline: $mx !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $my: 4px * $i;
+  .my-#{$i} {
+    margin-block: $my !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $p: 4px * $i;
+  .p-#{$i} {
+    padding: $p !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $pb: 4px * $i;
+  .pb-#{$i} {
+    padding-bottom: $pb !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $pt: 4px * $i;
+  .pt-#{$i} {
+    padding-top: $pt !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $pl: 4px * $i;
+  .pl-#{$i} {
+    padding-left: $pl !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $pr: 4px * $i;
+  .pr-#{$i} {
+    padding: $pr !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $px: 4px * $i;
+  .px-#{$i} {
+    padding-inline: $px !important;
+  }
+}
+
+@for $i from 1 through 96 {
+  $py: 4px * $i;
+  .py-#{$i} {
+    padding-block: $py !important;
+  }
+}
