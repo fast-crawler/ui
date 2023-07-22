@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import Icon from "@mdi/react";
 import { mdiGithub } from "@mdi/js";
 
@@ -11,10 +11,11 @@ export interface BaseFrameProps {
 }
 
 function BaseFrame({ title, children }: BaseFrameProps) {
+  const [lang, setLang] = useState<string>("English");
   return (
     <div className="base-frame">
       <div className="header">
-        <h2>{title}</h2>
+        <h2 className="text-2xl font-bold">{title}</h2>
         <div className="header__lang">
           <Icon
             path={mdiGithub}
@@ -22,7 +23,7 @@ function BaseFrame({ title, children }: BaseFrameProps) {
             color="var(--color-text)"
             className="mr-2"
           />
-          <DropdownMenu options={["English"]} />
+          <DropdownMenu title={lang} setTitle={setLang} items={["English"]} />
         </div>
       </div>
       <div className="container">{children}</div>
