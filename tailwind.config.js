@@ -16,6 +16,7 @@ export default {
         background: "#f8fafc",
         border: "#e5e5e5",
         "bg-text": "rgba(0, 0, 0, 0.1)",
+        "secondary-text": "#949494",
       },
     },
   },

@@ -37,10 +37,57 @@ html,
   --color-background: #f8fafc;
   --color-border: #e5e5e5;
   --color-bg-text: rgba(0, 0, 0, 0.1);
+  --color-secondary-text: #949494;
 }
 
 .devider {
   height: 1px;
   width: 100%;
   background: var(--color-border);
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  border: 2px solid var(--color-border);
+  box-shadow: 0px 0px 20px 0px rgba(27, 89, 248, 0.05);
+}
+
+.divider {
+  height: 0px;
+  width: 100%;
+  border-top: 1px solid var(--color-border);
+}
+
+table {
+  thead {
+    border-bottom: 1px solid var(--color-border);
+    tr {
+      th {
+        color: var(--color-secondary-text);
+        text-align: start;
+        font-weight: 400;
+        padding: 16px 0;
+      }
+    }
+  }
+  tbody {
+    tr {
+      td {
+        text-align: start;
+        font-weight: 600;
+        padding: 16px 0;
+      }
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply py-2 px-4 bg-bg-primary text-primary font-semibold rounded-xl hover:opacity-80;
+  }
+
+  .badge {
+    @apply py-[6px] px-4 font-semibold rounded-lg;
+  }
 }

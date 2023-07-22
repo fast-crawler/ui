@@ -26,7 +26,8 @@ function BaseFrame({ title, children }: BaseFrameProps) {
           <DropdownMenu title={lang} setTitle={setLang} items={["English"]} />
         </div>
       </div>
-      <div className="container">{children}</div>
+      <div className="divider -mt-[13px] mb-6"></div>
+      <div className="contain">{children}</div>
     </div>
   );
 }
