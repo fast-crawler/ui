@@ -15,7 +15,7 @@ function DefaultLayout({ children }: BaseLayoutProps) {
 
   return (
     <div id="default-layout">
-      <header className="siderbar">
+      <header className="siderbar hidden sm:block">
         <img src="/images/sidebar_logo.svg" alt="logo" />
         <div className="devider my-6"></div>
         <ul className="side-menu">
