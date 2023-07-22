@@ -1,0 +1,22 @@
+.base-frame {
+  height: 100%;
+  padding: 0 36px;
+  display: flex;
+  flex-direction: column;
+
+  .header {
+    height: 108px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__lang {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .container {
+    flex-grow: 1;
+  }
+}

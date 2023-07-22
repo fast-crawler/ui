@@ -18,13 +18,13 @@ function DefaultLayout({ children }: BaseLayoutProps) {
       <header className="siderbar">
         <img src="/images/sidebar_logo.svg" alt="logo" />
         <div className="devider my-6"></div>
-        <ul className="menu">
+        <ul className="side-menu">
           {routers.map((item) => {
             if (item.isShowSideBar)
               return (
                 <li
                   key={item.name}
-                  className={`menu__item ${
+                  className={`side-menu__item ${
                     item.path === location.pathname ? "active" : ""
                   }`}
                   onClick={() => navigate(item.path!)}
