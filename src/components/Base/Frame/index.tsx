@@ -14,7 +14,7 @@ function BaseFrame({ title, children }: BaseFrameProps) {
   const [lang, setLang] = useState<string>("English");
   return (
     <div className="base-frame">
-      <div className="header">
+      <div className="header flex-none">
         <h2 className="text-2xl font-bold">{title}</h2>
         <div className="header__lang">
           <Icon
@@ -26,7 +26,7 @@ function BaseFrame({ title, children }: BaseFrameProps) {
           <DropdownMenu title={lang} setTitle={setLang} items={["English"]} />
         </div>
       </div>
-      <div className="divider -mt-[13px] mb-6"></div>
+      <div className="divider mb-6"></div>
       <div className="contain">{children}</div>
     </div>
   );

@@ -1,12 +1,12 @@
 function SpidersTable() {
   return (
-    <div className="dashboard-spiders-table">
-      <div className="card px-9 py-5">
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-xl font-semibold">Last spiders</h3>
-          <button className="btn-primary">See All</button>
-        </div>
-        <table className="w-full table table-auto">
+    <div className="main-card px-4 md:px-9 py-5 w-full overflow-x-auto">
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-xl font-semibold">Last spiders</h3>
+        <button className="btn-primary">See All</button>
+      </div>
+      <div>
+        <table className="table-auto min-w-full">
           <thead>
             <tr>
               <th className="w-1/12">#</th>

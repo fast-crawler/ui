@@ -47,7 +47,7 @@ function index() {
     <div id="index">
       <BaseFrame title="Dashboard">
         <div className="flex flex-col md:flex-row gap-8 mb-8">
-          <div className="card w-full md:w-1/2 py-5 px-6">
+          <div className="main-card w-full md:w-1/2 py-5 px-6">
             <h3 className="text-xl font-semibold">request per second</h3>
             <div className="divider my-3"></div>
             <Line
@@ -57,7 +57,7 @@ function index() {
                 datasets: [
                   {
                     fill: true,
-                    label: "Sites",
+                    label: "requests",
                     data: requests,
                     pointBackgroundColor: "#1b59f8",
                     borderColor: "#1b59f8",
@@ -68,7 +68,7 @@ function index() {
               }}
             />
           </div>
-          <div className="card w-full md:w-1/2 py-5 px-6">
+          <div className="main-card w-full md:w-1/2 py-5 px-6">
             <h3 className="text-xl font-semibold">Spider running state</h3>
             <div className="divider my-3"></div>
             <Line
@@ -78,7 +78,7 @@ function index() {
                 datasets: [
                   {
                     fill: true,
-                    label: "Sites",
+                    label: "spider",
                     data: spiderData,
                     pointBackgroundColor: "#1b59f8",
                     borderColor: "#1b59f8",
@@ -91,6 +91,7 @@ function index() {
           </div>
         </div>
         <SpidersTable />
+        <div className="mb-16"></div>
       </BaseFrame>
     </div>
   );
