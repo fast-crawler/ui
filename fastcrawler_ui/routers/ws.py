@@ -1,8 +1,6 @@
-import asyncio
+from fastapi import APIRouter, Depends, WebSocket
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-
-from fastcrawler_ui.controllers.ws import ConnectionManager
+from fastcrawler_ui.controllers.ws import WSController
 
 router = APIRouter()
 
@@ -10,7 +8,7 @@ router = APIRouter()
 @router.websocket("/ws")
 async def clients(
     websocket: WebSocket,
-    connection: ConnectionManager = Depends(ConnectionManager),
+    ws_controller: WSController = Depends(WSController),
 ):
     """
     WebSocket endpoint for handling client connections.
@@ -21,9 +19,4 @@ async def clients(
     Returns:
         None
     """
-    await connection.connect(websocket)
-    try:
-        while True:
-            await asyncio.sleep(1)
-    except WebSocketDisconnect:
-        connection.disconnect(websocket)
+    await ws_controller.get_connection(websocket)
