@@ -10,11 +10,13 @@ from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
 async def run_async(
     crawler: FastCrawler,
     server: UvicornServer | None = None,
-    uvicorn_config: UvicornConfig | None = None,
+    uvicorn_config: UvicornConfig | dict | None = None,
     fastapi_app=app,
 ):
     if uvicorn_config is None:
         uvicorn_config = UvicornConfig(app=fastapi_app)
+    if isinstance(uvicorn_config, dict):
+        uvicorn_config = UvicornConfig(app=fastapi_app, **uvicorn_config)
 
     if server is None:
         server = UvicornServer(
@@ -31,7 +33,7 @@ async def run_async(
 def run(
     crawler: FastCrawler,
     server: UvicornServer | None = None,
-    uvicorn_config: UvicornConfig | None = None,
+    uvicorn_config: UvicornConfig | dict | None = None,
     fastapi_app=app,
 ):
     asyncio.run(

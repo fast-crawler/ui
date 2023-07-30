@@ -41,4 +41,4 @@ crawler = app = FastCrawler(
     )
 )
 
-run(crawler=crawler)
+run(crawler=crawler, uvicorn_config={"port": 8001})
