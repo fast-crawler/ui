@@ -1,13 +1,13 @@
 from typing import Callable
 
-from fastcrawler import FastCrawler, Depends
+from fastcrawler import Depends, FastCrawler
 from fastcrawler.schedule.schema import Task
 
 
-class CrawlerRepository:
+class SpiderRepository:
     def __init__(self):
         """
-        Initializes the CrawlerRepository.
+        Initializes the SpiderRepository.
         """
         self.crawlers = set()
 
@@ -39,7 +39,9 @@ class CrawlerRepository:
         await crawler.controller.add_task(task_func, settings)
         return None
 
-    async def change_task_schedule_from_crawler(self, crawler: FastCrawler, task_name: str, schedule: str) -> None:
+    async def change_task_schedule_from_crawler(
+        self, crawler: FastCrawler, task_name: str, schedule: str
+    ) -> None:
         """Change task schedule in the crawler.
 
         Args:

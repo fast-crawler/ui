@@ -1,16 +1,23 @@
-from typing import Any
+from typing import Any, Type
 
 from fastapi import APIRouter, Depends
 from fastcrawler import FastCrawler
 from fastcrawler.schedule.schema import Task
 from pydantic import FieldValidationInfo, field_validator
 
-from fastcrawler_ui.controllers.spider import CrawlerController
+from fastcrawler_ui.controllers.spider import SpiderController
 from fastcrawler_ui.core.fastapi.depends import get_crawler
-from fastcrawler_ui.repository.spiders import CrawlerRepository
+from fastcrawler_ui.repository.spiders import SpiderRepository
 
 router = APIRouter()
-crawler_repository = CrawlerRepository()
+
+
+def get_spider_repository():
+    return SpiderRepository()
+
+
+def spider_controller_cls() -> Type[SpiderController]:
+    return SpiderController
 
 
 class TaskJson(Task):
@@ -22,12 +29,16 @@ class TaskJson(Task):
 
 
 @router.get("/all", response_model=list[TaskJson])
-async def clients(crawler: FastCrawler = Depends(get_crawler)):
+async def clients(
+    crawler: FastCrawler = Depends(get_crawler),
+    spider_repository: SpiderRepository = Depends(get_spider_repository),
+    controller: Type[SpiderController] = Depends(spider_controller_cls),
+):
     """
     clients endpoint for retrieves crawler tasks.
 
     \f
     :param items: list of Task.
     """
-    items = await CrawlerController(crawler_repository).get_task(crawler)
+    items = await controller(spider_repository).get_task(crawler)
     return items
