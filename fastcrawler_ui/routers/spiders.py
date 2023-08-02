@@ -15,7 +15,7 @@ crawler_repository = CrawlerRepository()
 #     return [result.model_dump() for result in results]
 
 
-@router.get("/all")  # , response_model=list[Task])
+@router.get("/all", response_model=list[Task])
 async def clients(crawler: FastCrawler = Depends(get_crawler)):
     """
     clients endpoint for retrieves crawler tasks.
