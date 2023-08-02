@@ -1,6 +1,9 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends
 from fastcrawler import FastCrawler
 from fastcrawler.schedule.schema import Task
+from pydantic import FieldValidationInfo, field_validator
 
 from fastcrawler_ui.controllers.spider import CrawlerController
 from fastcrawler_ui.core.fastapi.depends import get_crawler
@@ -9,13 +12,16 @@ from fastcrawler_ui.repository.spiders import CrawlerRepository
 router = APIRouter()
 crawler_repository = CrawlerRepository()
 
-# @router.get("/all")
-# async def clients(crawler: FastCrawler = Depends(get_crawler)):
-#     results = await crawler.controller.all()
-#     return [result.model_dump() for result in results]
+
+class TaskJson(Task):
+    @field_validator("start_cond", "end_cond")
+    @classmethod
+    def check_alphanumeric(cls, v: Any, info: FieldValidationInfo) -> str:
+        if v is not None:
+            return str(v) if str(v).lower() != "false" else False
 
 
-@router.get("/all", response_model=list[Task])
+@router.get("/all", response_model=list[TaskJson])
 async def clients(crawler: FastCrawler = Depends(get_crawler)):
     """
     clients endpoint for retrieves crawler tasks.
