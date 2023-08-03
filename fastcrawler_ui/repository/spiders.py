@@ -2,6 +2,7 @@ from typing import Callable
 
 from fastcrawler import Depends, FastCrawler
 from fastcrawler.schedule.schema import Task
+from fastcrawler.core import Process
 
 
 class SpiderRepository:
@@ -25,7 +26,9 @@ class SpiderRepository:
         self.crawlers.add(crawler)
         return await crawler.controller.app.get_all_tasks()
 
-    async def add_task_to_crawler(self, crawler: FastCrawler, task_func: Callable, settings: Task):
+    async def add_task_to_crawler(
+        self, crawler: FastCrawler, task_func: Callable, settings: Task
+    ):
         """Add a task to the crawler.
 
         Args:
@@ -55,7 +58,9 @@ class SpiderRepository:
         await crawler.controller.change_task_schedule(task_name, schedule)
         return None
 
-    async def toggle_task_from_crawler(self, crawler: FastCrawler, task_name: str) -> None:
+    async def toggle_task_from_crawler(
+        self, crawler: FastCrawler, task_name: str
+    ) -> None:
         """Toggle task schedule in the crawler.
 
         Returns:
@@ -64,3 +69,13 @@ class SpiderRepository:
         self.crawlers.add(crawler)
         await crawler.controller.toggle_task(task_name)
         return None
+
+    async def get_tasks_in_processes(self, crawler: FastCrawler) -> dict[Process, Task]:
+        """Get all tasks from the crawler.
+
+        Returns:
+            Dict[Process, Task]
+        """
+        self.crawlers.add(crawler)
+        processes = {process: process.task for process in crawler.crawlers}
+        return processes
