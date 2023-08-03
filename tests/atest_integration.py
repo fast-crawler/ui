@@ -37,7 +37,7 @@ class MySpider(Spider):
 crawler = app = FastCrawler(
     crawlers=Process(
         spider=MySpider(),
-        cond="every 10 minute",
+        cond="every 1 minute",
     )
 )
 
