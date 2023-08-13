@@ -1,7 +1,8 @@
 from fastapi import HTTPException, status
 from fastcrawler import Depends, FastCrawler
+from fastcrawler.schedule.schema import Task
 
-from fastcrawler_ui.repository.spiders import SpiderRepository
+from fastcrawler_ui.repository.spiders import SpiderRepository, TaskSettings
 
 
 class SpiderController:
@@ -23,9 +24,24 @@ class SpiderController:
         )
 
     async def start_task_by_name(self, crawler: FastCrawler, task_name: str):
-        task = await self.get_process_by_task(crawler=crawler, task_name=task_name)
-        await task.start()
+        process = await self.get_process_by_task(
+            crawler=crawler,
+            task_name=task_name,
+        )
+        await process.start()
 
     async def stop_task_by_name(self, crawler: FastCrawler, task_name: str):
-        task = await self.get_process_by_task(crawler=crawler, task_name=task_name)
+        task = await self.get_process_by_task(
+            crawler=crawler,
+            task_name=task_name,
+        )
         await task.stop()
+
+    async def update_task_by_name(
+        self, crawler: FastCrawler, task_name: str, settings: TaskSettings
+    ) -> Task | None:
+        return await self.spider_repo.update_task(
+            crawler=crawler,
+            task_name=task_name,
+            task_settings=settings,
+        )

@@ -7,9 +7,9 @@ from pydantic import FieldValidationInfo, field_validator
 
 from fastcrawler_ui.controllers.spider import SpiderController
 from fastcrawler_ui.core.fastapi.depends import get_crawler
-from fastcrawler_ui.repository.spiders import SpiderRepository
+from fastcrawler_ui.repository.spiders import SpiderRepository, TaskSettings
 
-router = APIRouter()
+spider_router = APIRouter()
 
 
 def get_spider_repository():
@@ -29,7 +29,7 @@ class TaskJson(Task):
         return None
 
 
-@router.get("/all", response_model=list[TaskJson])
+@spider_router.get("/all", response_model=list[TaskJson])
 async def clients(
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
@@ -45,7 +45,7 @@ async def clients(
     return items
 
 
-@router.post("/stop_task", status_code=status.HTTP_204_NO_CONTENT)
+@spider_router.post("/stop_task", status_code=status.HTTP_204_NO_CONTENT)
 async def stop_task(
     task_name: str,
     crawler: FastCrawler = Depends(get_crawler),
@@ -60,7 +60,7 @@ async def stop_task(
     await spider_controller(spider_repository).stop_task_by_name(crawler, task_name)
 
 
-@router.post("/start_task", status_code=status.HTTP_204_NO_CONTENT)
+@spider_router.post("/start_task", status_code=status.HTTP_204_NO_CONTENT)
 async def start_task(
     task_name: str,
     crawler: FastCrawler = Depends(get_crawler),
@@ -73,3 +73,21 @@ async def start_task(
 
     """
     await spider_controller(spider_repository).start_task_by_name(crawler, task_name)
+
+
+@spider_router.post("/update_task", response_model=TaskJson, status_code=status.HTTP_200_OK)
+async def update_task(
+    task_name: str,
+    task_settings: TaskSettings,
+    crawler: FastCrawler = Depends(get_crawler),
+    spider_repository: SpiderRepository = Depends(get_spider_repository),
+    spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
+):
+    """
+    update_task endpoint for update a crawler task.
+
+
+    """
+    return await spider_controller(spider_repository).update_task_by_name(
+        crawler, task_name, task_settings
+    )
