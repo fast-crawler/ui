@@ -11,9 +11,7 @@ class Unset:
     """
     Unset Value class
     """
-
-    def __init__(self):
-        pass
+    pass
 
 
 _UNSET = Unset()

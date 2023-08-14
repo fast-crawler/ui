@@ -3,13 +3,22 @@
 import pytest_asyncio
 
 from fastcrawler.engine.contracts import RequestCycle
-from fastcrawler import BaseModel, Depends, FastCrawler, Process, Spider, XPATHField
-
-from fastcrawler_ui import run_async
+from fastcrawler import BaseModel, Depends, FastCrawler as _FastCrawler, Process, Spider, XPATHField
 
 started_crawler_flag = False
 
 stopted_crawler_flag = 0
+
+total_crawled = 0
+
+
+class FastCrawler(_FastCrawler):
+    async def run2(self) -> None:
+        """Prepare all crawlers in background explicitly with schedule without serving"""
+        for crawler in self.crawlers:
+            crawler.controller = self.controller
+            await crawler.add_spiders()
+        return None
 
 
 class PersonData(BaseModel):
@@ -59,6 +68,18 @@ class MySpiderStoped(Spider):
         assert stopted_crawler_flag == 1
 
 
+class MySpider(Spider):
+    engine_request_limit = 10
+    data_model = PersonPage
+    start_url = Depends(get_urls)
+
+    async def save(self, all_data: list[PersonPage]):
+        assert all_data is not None
+        assert len(all_data) == 10
+        global total_crawled
+        total_crawled += 1
+
+
 def get_started_fastcrawler():
     crawler = FastCrawler(
         crawlers=[
@@ -97,3 +118,16 @@ async def stopted_crawler():
     for process in crawler.crawlers:
         await process.stop()
     return crawler
+
+
+def get_fastcrawler():
+    crawler = FastCrawler(
+        crawlers=Process(
+            spider=MySpider(),
+            cond="every 1 minute",
+        )
+    )
+    return crawler
+
+
+

@@ -1,14 +1,31 @@
+import os
+import sys
+import asyncio
+
 import pytest
-from fastcrawler import FastCrawler
+from fastapi.testclient import TestClient
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+from fastcrawler_ui.core.fastapi.app import app
+from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
+from .conftest import get_fastcrawler
 
 
-@pytest.mark.asyncio
-async def test_started_task(started_crawler: FastCrawler):
-    # started_crawler.crawlers[0].spider.save()
-    started_crawler.crawlers[0].spider
+crawler = get_fastcrawler()
+
+sync_crawler_to_fastapi(app, crawler)
+
+client = TestClient(app)
+
+asyncio.run(crawler.run2())
 
 
-@pytest.mark.asyncio
-async def test_stopted_task(stopted_crawler: FastCrawler):
-    # stopted_crawler.crawlers[0].spider.save()
-    stopted_crawler
+def test_all():
+    response = client.get("/all")
+    print(response)
+    content = response.json()
+    assert response.status_code == 200
+    assert len(content) == 1
+    assert len(content[0]) == 11
+    assert content[0]["name"].startswith("MySpider")
