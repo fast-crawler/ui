@@ -2,8 +2,11 @@
 import os
 import sys
 import asyncio
-import pytest_asyncio
+from unittest.mock import AsyncMock
 
+import pytest
+import pytest_asyncio
+from fastapi.testclient import TestClient
 from fastcrawler.engine.contracts import RequestCycle
 from fastcrawler import (
     BaseModel,
@@ -17,9 +20,10 @@ from fastcrawler import (
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from fastapi.testclient import TestClient
 from fastcrawler_ui.core.fastapi.app import app
 from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
+from fastcrawler_ui.repository.ws import ConnectionRepository
+
 
 started_crawler_flag = False
 
@@ -96,46 +100,6 @@ class MySpider(Spider):
         total_crawled += 1
 
 
-def get_started_fastcrawler():
-    crawler = FastCrawler(
-        crawlers=[
-            Process(
-                spider=MySpiderStarted(),
-                cond="every 2 minute",
-            ),
-        ]
-    )
-    return crawler
-
-
-def get_stopped_fastcrawler():
-    crawler = FastCrawler(
-        crawlers=[
-            Process(
-                spider=MySpiderStopped(),
-                cond="every 5 minute",
-            ),
-        ]
-    )
-    return crawler
-
-
-@pytest_asyncio.fixture(scope="function")
-async def started_crawler():
-    crawler = get_started_fastcrawler()
-    # await run_async(crawler=crawler, uvicorn_config={"port": 8001})
-    return crawler
-
-
-@pytest_asyncio.fixture(scope="function")
-async def stopped_crawler():
-    crawler = get_stopped_fastcrawler()
-    # await run_async(crawler=crawler, uvicorn_config={"port": 8001})
-    for process in crawler.crawlers:
-        await process.stop()
-    return crawler
-
-
 def get_fastcrawler():
     crawler = FastCrawler(
         crawlers=Process(
@@ -152,5 +116,15 @@ def client():
     sync_crawler_to_fastapi(app, crawler)
     client = TestClient(app)
     asyncio.run(crawler.run2())
-    
+
     yield client
+
+
+@pytest.fixture
+def manager():
+    yield ConnectionRepository()
+
+
+@pytest.fixture
+def websocket():
+    yield AsyncMock()
