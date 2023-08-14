@@ -45,3 +45,10 @@ class SpiderController:
             task_name=task_name,
             task_settings=settings,
         )
+
+    async def toggle_task_by_name(self, crawler: FastCrawler, task_name: str) -> Task | None:
+        await self.spider_repo.toggle_task_from_crawler(
+            crawler=crawler,
+            task_name=task_name,
+        )
+        return None

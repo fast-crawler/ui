@@ -75,6 +75,21 @@ async def start_task(
     await spider_controller(spider_repository).start_task_by_name(crawler, task_name)
 
 
+@spider_router.post("/toggle_task", status_code=status.HTTP_204_NO_CONTENT)
+async def toggle_task(
+    task_name: str,
+    crawler: FastCrawler = Depends(get_crawler),
+    spider_repository: SpiderRepository = Depends(get_spider_repository),
+    spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
+):
+    """
+    toggle_task endpoint for toggle a crawler task (start/stop).
+
+
+    """
+    return await spider_controller(spider_repository).toggle_task_by_name(crawler, task_name)
+
+
 @spider_router.post("/update_task", response_model=TaskJson, status_code=status.HTTP_200_OK)
 async def update_task(
     task_name: str,
