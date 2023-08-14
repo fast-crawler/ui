@@ -14,7 +14,7 @@ class SpiderController:
         return [result.model_dump() for result in results]
 
     async def get_process_by_task(self, crawler: FastCrawler, task_name: str):
-        results = await self.spider_repo.get_tasks_in_processes(crawler)
+        results = self.spider_repo.get_tasks_in_processes(crawler)
         for process, task in results.items():
             if task.name == task_name:
                 return process

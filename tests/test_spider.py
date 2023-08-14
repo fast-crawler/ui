@@ -9,6 +9,7 @@ def get_exist_task_name(client):
     content = response.json()
     return content[0]["name"]
 
+
 def get_exist_task(client):
     response = client.get("/all")
     content = response.json()
@@ -50,6 +51,7 @@ def test_toggle_task(client):
 
 def test_update_task(client):
     task_name = get_exist_task_name(client)
+    original_task_setting = get_exist_task(client)
     data = {
         "description": "sample Description",
     }
@@ -58,6 +60,10 @@ def test_update_task(client):
     content = response.json()
     assert response.status_code == 200
     assert len(content) == 11
+    for key in original_task_setting.keys():
+        if key not in data:
+            assert content[key] == original_task_setting[key]
+
     assert content["description"] == data["description"]
     task_setting = get_exist_task(client)
     assert task_setting["description"] == data["description"]

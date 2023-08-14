@@ -117,23 +117,22 @@ class SpiderRepository:
         self.crawlers.add(crawler)
         new_task_settings = task_settings.model_dump()
         task = await self.get_task_by_name(crawler, task_name)
-        if task:
-            new_task: Task = task
+        if task is not None:
             for key, value in new_task_settings.items():
                 if value is not _UNSET:
-                    setattr(new_task, key, value)
+                    setattr(task, key, value)
 
-            return new_task
+            return task
         return None
 
-    async def get_tasks_in_processes(self, crawler: FastCrawler) -> dict[Process, Task]:
+    def get_tasks_in_processes(self, crawler: FastCrawler) -> dict[Process, Task]:
         """Get all tasks from the crawler.
 
         Returns:
             Dict[Process, Task]
         """
         self.crawlers.add(crawler)
-        processes = {process: process.task for process in crawler.crawlers}
+        processes = {process: task for process, task in zip(crawler.crawlers, crawler.controller.app.task_lib.session.tasks)}
         return processes
 
     async def get_task_by_name(self, crawler: FastCrawler, task_name: str) -> Task | None:
@@ -145,7 +144,7 @@ class SpiderRepository:
         self.crawlers.add(crawler)
         tasks = [
             task
-            for task in (await self.get_tasks_in_processes(crawler=crawler)).values()
+            for task in self.get_tasks_in_processes(crawler=crawler).values()
             if task.name == task_name
         ]
         if len(tasks) > 0:
