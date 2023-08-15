@@ -1,6 +1,6 @@
 # pylint: skip-file
 import asyncio
-from typing import Generator
+from typing import Generator, AsyncGenerator
 from unittest.mock import AsyncMock
 
 import pytest
@@ -9,11 +9,12 @@ from fastapi.testclient import TestClient
 from fastcrawler import (
     BaseModel,
     Depends,
-    FastCrawler as _FastCrawler,
+    FastCrawler,
     Process,
     Spider,
     XPATHField,
 )
+from tests.spider_mock import MySpider as MockSpider
 
 
 from fastcrawler_ui.core.fastapi.app import app
@@ -28,13 +29,21 @@ stopped_crawler_flag = 0
 total_crawled = 0
 
 
-class FastCrawler(_FastCrawler):
-    async def run2(self) -> None:
-        """Prepare all crawlers in background explicitly with schedule without serving"""
-        for crawler in self.crawlers:
-            crawler.controller = self.controller
-            await crawler.add_spiders()
-        return None
+@pytest.fixture(scope="session")
+def event_loop():
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    yield loop
+    loop.close()
+
+
+# async def patch_run(self) -> None:
+#     """Prepare all crawlers in background explicitly with schedule without serving"""
+#     for crawler in self.crawlers:
+#         crawler.controller = self.controller
+#         await crawler.add_spiders()
+
+#     return None
 
 
 class PersonData(BaseModel):
@@ -50,25 +59,25 @@ async def get_urls():
     return {f"http://localhost:8000/persons/{id}" for id in range(20)}
 
 
-class MySpider(Spider):
-    engine_request_limit = 10
-    data_model = PersonPage
-    start_url = Depends(get_urls)
+# class MySpider(Spider):
+#     engine_request_limit = 10
+#     data_model = PersonPage
+#     start_url = Depends(get_urls)
 
 
-def get_fastcrawler():
+def get_fastcrawler() -> FastCrawler:
     crawler = FastCrawler(
         crawlers=(
             Process(
-                spider=MySpider(),
+                spider=MockSpider(),
                 cond="every 1 minute",
             ),
             Process(
-                spider=MySpider(),
+                spider=MockSpider(),
                 cond="every 3 minute",
             ),
             Process(
-                spider=MySpider(),
+                spider=MockSpider(),
                 cond="every 5 minute",
             ),
         )
@@ -77,13 +86,15 @@ def get_fastcrawler():
 
 
 @pytest_asyncio.fixture(scope="session")
-def client() -> Generator[TestClient, None, None]:
+async def client() -> AsyncGenerator[TestClient, None]:
     crawler = get_fastcrawler()
     sync_crawler_to_fastapi(app, crawler)
     client = TestClient(app)
-    asyncio.run(crawler.run2())
+    task = asyncio.create_task(crawler.run())
 
     yield client
+    task.cancel()
+    await asyncio.gather(task, return_exceptions=True)
 
 
 @pytest.fixture

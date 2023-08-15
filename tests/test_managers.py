@@ -1,14 +1,26 @@
-import sys
-import os
+import asyncio
 from unittest.mock import AsyncMock
 
 import pytest
+from fastapi import WebSocket
+from fastcrawler_ui.repository.ws import ConnectionRepository, Message
+
 from tests.conftest import client, websocket
 
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+async def override_get_connection__send_data(self, websocket: WebSocket):
+    await self.ws_connection_repo.connect(websocket)
+    await websocket.accept()
+    await websocket.send_json({"test": "OK"})
+    self.ws_connection_repo.disconnect(websocket)
 
-from fastcrawler_ui.repository.ws import ConnectionRepository, Message
+
+async def override_get_connection__receive_data(self, websocket: WebSocket):
+    await self.ws_connection_repo.connect(websocket)
+    await websocket.accept()
+    res = await websocket.receive_json()
+    self.ws_connection_repo.disconnect(websocket)
+    return res
 
 
 @pytest.mark.asyncio
