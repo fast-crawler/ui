@@ -1,13 +1,11 @@
 # pylint: skip-file
-import os
-import sys
 import asyncio
+from typing import Generator
 from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from fastcrawler.engine.contracts import RequestCycle
 from fastcrawler import (
     BaseModel,
     Depends,
@@ -17,8 +15,6 @@ from fastcrawler import (
     XPATHField,
 )
 
-
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from fastcrawler_ui.core.fastapi.app import app
 from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
@@ -54,50 +50,10 @@ async def get_urls():
     return {f"http://localhost:8000/persons/{id}" for id in range(20)}
 
 
-class MySpiderStarted(Spider):
-    engine_request_limit = 10
-    data_model = PersonPage
-    start_url = Depends(get_urls)
-
-    async def save_cycle(self, all_data: list[RequestCycle]) -> None:
-        global started_crawler_flag
-        started_crawler_flag = True
-        return await super().save_cycle(all_data)
-
-    async def save(self, all_data: list[PersonPage]):
-        global started_crawler_flag
-        assert all_data is not None
-        assert len(all_data) == 10
-        assert started_crawler_flag == True
-
-
-class MySpiderStopped(Spider):
-    engine_request_limit = 5
-    data_model = PersonPage
-    start_url = Depends(get_urls)
-
-    async def save_cycle(self, all_data: list[RequestCycle]) -> None:
-        global stopped_crawler_flag
-        stopped_crawler_flag += 1
-        return await super().save_cycle(all_data)
-
-    async def save(self, all_data: list[PersonPage]):
-        global stopped_crawler_flag
-        assert all_data is not None
-        assert len(all_data) == 10
-        assert stopped_crawler_flag == 1
-
-
 class MySpider(Spider):
     engine_request_limit = 10
     data_model = PersonPage
     start_url = Depends(get_urls)
-
-    async def save(self, all_data: list[PersonPage]):
-        assert all_data is not None
-        assert len(all_data) == 10
-        global total_crawled
-        total_crawled += 1
 
 
 def get_fastcrawler():
@@ -121,7 +77,7 @@ def get_fastcrawler():
 
 
 @pytest_asyncio.fixture(scope="session")
-def client():
+def client() -> Generator[TestClient, None, None]:
     crawler = get_fastcrawler()
     sync_crawler_to_fastapi(app, crawler)
     client = TestClient(app)
@@ -131,10 +87,10 @@ def client():
 
 
 @pytest.fixture
-def manager():
+def manager() -> Generator[ConnectionRepository, None, None]:
     yield ConnectionRepository()
 
 
 @pytest.fixture
-def websocket():
+def websocket() -> Generator[AsyncMock, None, None]:
     yield AsyncMock()
