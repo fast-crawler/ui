@@ -1,26 +1,17 @@
 # pylint: skip-file
 import asyncio
-from typing import Generator, AsyncGenerator
+from typing import AsyncGenerator, Generator
 from unittest.mock import AsyncMock
 
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from fastcrawler import (
-    BaseModel,
-    Depends,
-    FastCrawler,
-    Process,
-    Spider,
-    XPATHField,
-)
-from tests.spider_mock import MySpider as MockSpider
-
+from fastcrawler import BaseModel, Depends, FastCrawler, Process, XPATHField
 
 from fastcrawler_ui.core.fastapi.app import app
 from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
 from fastcrawler_ui.repository.ws import ConnectionRepository
-
+from tests.spider_mock import MySpider as MockSpider
 
 started_crawler_flag = False
 
@@ -59,12 +50,6 @@ async def get_urls():
     return {f"http://localhost:8000/persons/{id}" for id in range(20)}
 
 
-# class MySpider(Spider):
-#     engine_request_limit = 10
-#     data_model = PersonPage
-#     start_url = Depends(get_urls)
-
-
 def get_fastcrawler() -> FastCrawler:
     crawler = FastCrawler(
         crawlers=(
@@ -85,23 +70,22 @@ def get_fastcrawler() -> FastCrawler:
     return crawler
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="session", autouse=True)
 async def client() -> AsyncGenerator[TestClient, None]:
     crawler = get_fastcrawler()
     sync_crawler_to_fastapi(app, crawler)
     client = TestClient(app)
     task = asyncio.create_task(crawler.run())
-
     yield client
     task.cancel()
     await asyncio.gather(task, return_exceptions=True)
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def manager() -> Generator[ConnectionRepository, None, None]:
     yield ConnectionRepository()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def websocket() -> Generator[AsyncMock, None, None]:
     yield AsyncMock()

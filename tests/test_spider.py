@@ -1,22 +1,24 @@
 import json
 
-import pytest
-from tests.conftest import client
+from fastapi.testclient import TestClient
 
 
-def get_exist_task_name(client):
+def get_exist_task_name(client: TestClient):
     response = client.get("/all")
     content = response.json()
     return content[0]["name"]
 
 
-def get_exist_task(client):
+def get_exist_task(client: TestClient, task_name: str):
     response = client.get("/all")
     content = response.json()
-    return content[0]
+    for task in content:
+        if task["name"] == task_name:
+            return task
+    raise AssertionError("Task is found")
 
 
-def test_all(client):
+def test_all(client: TestClient):
     response = client.get("/all")
     content = response.json()
     assert response.status_code == 200
@@ -25,35 +27,38 @@ def test_all(client):
     assert content[0]["name"].startswith("MySpider")
 
 
-def test_stop_task(client):
+def test_stop_task(client: TestClient):
     task_name = get_exist_task_name(client)
-    task_original = get_exist_task(client)
+    task_before_stop = get_exist_task(client, task_name)
     response = client.post(f"/stop_task?task_name={task_name}")
-    task_stopped = get_exist_task(client)
-    content = response.text
+    task_after_stopped = get_exist_task(client, task_name)
     assert response.status_code == 204
-    assert content == ""
-    assert task_original["name"] == task_stopped["name"]
-    assert task_stopped["disabled"] == (not task_original["disabled"])  # == True
+    assert task_before_stop["name"] == task_after_stopped["name"]
+    assert task_after_stopped["disabled"] == (not task_before_stop["disabled"]) is True
 
 
-def test_start_task(client):
+def test_start_task(client: TestClient):
     task_name = get_exist_task_name(client)
-    task_original = get_exist_task(client)
+    task_original = get_exist_task(client, task_name)
     response = client.post(f"/start_task?task_name={task_name}")
-    task_started = get_exist_task(client)
+    task_started = get_exist_task(client, task_name)
     content = response.text
     assert response.status_code == 204
     assert content == ""
     assert task_original["name"] == task_started["name"]
-    assert task_started["disabled"] == (not task_original["disabled"])  # == False
+    assert task_started["disabled"] == (not task_original["disabled"]) is False
 
 
-def test_toggle_task(client):
+def test_task_invalid(client: TestClient):
+    response = client.post("/start_task?task_name=SHOULD_NOT_FIND")
+    assert response.status_code != 200
+
+
+def test_toggle_task(client: TestClient):
     task_name = get_exist_task_name(client)
-    task_original = get_exist_task(client)
+    task_original = get_exist_task(client, task_name)
     response = client.post(f"/toggle_task?task_name={task_name}")
-    task_toggled = get_exist_task(client)
+    task_toggled = get_exist_task(client, task_name)
     content = response.text
     assert response.status_code == 204
     assert content == ""
@@ -61,9 +66,9 @@ def test_toggle_task(client):
     assert task_original["disabled"] == (not task_toggled["disabled"])
 
 
-def test_update_task(client):
+def test_update_task(client: TestClient):
     task_name = get_exist_task_name(client)
-    original_task_setting = get_exist_task(client)
+    original_task_setting = get_exist_task(client, task_name)
     data = {
         "description": "sample Description",
     }
@@ -77,5 +82,5 @@ def test_update_task(client):
             assert content[key] == original_task_setting[key]
 
     assert content["description"] == data["description"]
-    task_setting = get_exist_task(client)
+    task_setting = get_exist_task(client, task_name)
     assert task_setting["description"] == data["description"]

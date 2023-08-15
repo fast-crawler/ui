@@ -1,10 +1,5 @@
-
-
-
 class MySpider:
     is_stopped = False
 
-    async def start(silent: bool): #type: ignore
+    async def start(self, silent: bool):  # type: ignore
         pass
-
-    
