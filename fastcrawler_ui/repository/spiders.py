@@ -11,6 +11,7 @@ class Unset:
     """
     Unset Value class
     """
+
     pass
 
 
@@ -132,7 +133,16 @@ class SpiderRepository:
             Dict[Process, Task]
         """
         self.crawlers.add(crawler)
-        processes = {process: task for process, task in zip(crawler.crawlers, crawler.controller.app.task_lib.session.tasks)}
+        session_tasks = crawler.controller.app.get_all_session_tasks()
+        crawler_processes = crawler.crawlers
+
+        processes = {
+            process: task
+            for process, task in zip(
+                sorted(crawler_processes, key=lambda process: process.task.name),
+                sorted(session_tasks, key=lambda task: task.name),
+            )
+        }
         return processes
 
     async def get_task_by_name(self, crawler: FastCrawler, task_name: str) -> Task | None:
