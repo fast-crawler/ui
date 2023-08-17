@@ -16,26 +16,38 @@ function spiders() {
   return (
     <div id="spiders">
       <BaseFrame title="Spiders">
-        <div className="flex mb-96 ml-1">
-          {/*------------ spiders filter ------------*/}
-          <SpidersFilter
-            selectedSort={selectedSort}
-            selectedState={selectedState}
-            onSortChange={setSelectedSort}
-            onStateChange={setSelectedState}
-          />
-          {/*------------ spider search field ------------*/}
-          <div className="flex p-2 border border-border bg-white rounded-lg text-text ml-5">
-            <Icon path={mdiMagnify} size={1} className="mr-2" />
-            <input
-              type="text"
-              placeholder="Search spiders by name"
-              value={searchName}
-              onChange={handleSearchChange}
-              className="outline-none"
+        <div className="flex justify-between mb-5">
+          <div className="flex mb-96 ml-1">
+            {/*------------ spiders filter ------------*/}
+            <SpidersFilter
+              selectedSort={selectedSort}
+              selectedState={selectedState}
+              onSortChange={setSelectedSort}
+              onStateChange={setSelectedState}
             />
+            {/*------------ spider search field ------------*/}
+            <div className="flex p-2 border border-border bg-white rounded-lg text-text ml-5">
+              <Icon path={mdiMagnify} size={1} className="mr-2" />
+              <input
+                type="text"
+                placeholder="Search spiders by name"
+                value={searchName}
+                onChange={handleSearchChange}
+                className="outline-none"
+              />
+            </div>
+          </div>
+          {/*------------ action buttons ------------*/}
+          <div className="flex h-10 gap-4">
+            <button className="btn-primary bg-error text-white">
+              stop all
+            </button>
+            <button className="btn-primary bg-success text-white">
+              start all
+            </button>
           </div>
         </div>
+        {/*------------ action buttons ------------*/}
       </BaseFrame>
     </div>
   );
