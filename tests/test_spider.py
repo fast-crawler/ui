@@ -15,7 +15,7 @@ def get_task_by_name(client: TestClient, task_name: str):
     for task in content:
         if task["name"] == task_name:
             return task
-    raise AssertionError("Task is found")
+    raise AssertionError("The task not found")
 
 
 def test_all(client: TestClient):
