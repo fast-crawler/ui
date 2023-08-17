@@ -11,7 +11,7 @@ export default {
         error: "#b91c1c",
         "bg-error": "rgba(185, 28, 28, 0.2)",
         warning: "#eab308",
-        "bg-warnging": "rgba(234, 179, 8, 0.2)",
+        "bg-warning": "rgba(234, 179, 8, 0.2)",
         text: "rgba(0, 0, 0, 0.7)",
         background: "#f8fafc",
         border: "#e5e5e5",

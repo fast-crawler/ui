@@ -31,7 +31,7 @@ function SpidersFilter({
   ];
 
   return (
-    <Menu as="div" className="relative inline-block text-left">
+    <Menu as="div" className="relative inline-block text-left z-30">
       {({ open }) => (
         <>
           <div className="transition-all duration-300">
@@ -60,7 +60,10 @@ function SpidersFilter({
                   SORT BY :{" "}
                 </h4>
                 {sortOptions.map((option) => (
-                  <label className="flex items-center justify-between cursor-pointer hover:bg-bg-primary p-1 px-2 rounded-md">
+                  <label
+                    key={option.value}
+                    className="flex items-center justify-between cursor-pointer hover:bg-bg-primary p-1 px-2 rounded-md"
+                  >
                     <span className="text-gray-800 text-sm">
                       {option.label}
                     </span>
@@ -78,7 +81,10 @@ function SpidersFilter({
                   STATE :{" "}
                 </h4>
                 {stateOptions.map((option) => (
-                  <label className="flex items-center justify-between cursor-pointer hover:bg-bg-primary p-1 px-2 rounded-md">
+                  <label
+                    key={option.value}
+                    className="flex items-center justify-between cursor-pointer hover:bg-bg-primary p-1 px-2 rounded-md"
+                  >
                     <span className="text-gray-800 text-sm">
                       {option.label}
                     </span>

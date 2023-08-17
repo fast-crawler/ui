@@ -4,6 +4,7 @@ import { mdiMagnify } from "@mdi/js";
 
 import BaseFrame from "../components/Base/Frame";
 import SpidersFilter from "../components/Spiders/FIlter";
+import SpidersDataTable from "../components/Spiders/DataTable";
 
 function spiders() {
   const [selectedSort, setSelectedSort] = useState<number>(1);
@@ -17,7 +18,7 @@ function spiders() {
     <div id="spiders">
       <BaseFrame title="Spiders">
         <div className="flex justify-between mb-5">
-          <div className="flex mb-96 ml-1">
+          <div className="flex ml-1">
             {/*------------ spiders filter ------------*/}
             <SpidersFilter
               selectedSort={selectedSort}
@@ -47,7 +48,8 @@ function spiders() {
             </button>
           </div>
         </div>
-        {/*------------ action buttons ------------*/}
+        {/*------------ spiders data table section ------------*/}
+        <SpidersDataTable />
       </BaseFrame>
     </div>
   );

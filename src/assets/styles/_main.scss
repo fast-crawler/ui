@@ -32,7 +32,7 @@ html,
   --color-error: #b91c1c;
   --color-bg-error: rgba(185, 28, 28, 0.2);
   --color-warning: #eab308;
-  --color-bg-warngin: rgba(234, 179, 8, 0.2);
+  --color-bg-warning: rgba(234, 179, 8, 0.2);
   --color-text: rgba(0, 0, 0, 0.7);
   --color-background: #f8fafc;
   --color-border: #e5e5e5;
@@ -73,6 +73,7 @@ table {
   }
   tbody {
     tr {
+      cursor: pointer;
       td {
         text-align: start;
         font-weight: 600;
