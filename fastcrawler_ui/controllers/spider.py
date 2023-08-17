@@ -14,14 +14,14 @@ class SpiderController:
         return [result.model_dump() for result in results]
 
     async def get_process_by_task(self, crawler: FastCrawler, task_name: str):
-        results = self.spider_repo.get_tasks_in_processes(crawler)
-        for process, task in results.items():
-            if task.name == task_name:
-                return process
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Task {task_name!r} not found",
-        )
+        result = await self.spider_repo.get_process_by_task_name(crawler, task_name)
+        if result is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Task {task_name!r} not found",
+            )
+        process, task = result
+        return process
 
     async def start_task_by_name(self, crawler: FastCrawler, task_name: str):
         process = await self.get_process_by_task(
@@ -31,11 +31,11 @@ class SpiderController:
         await process.start()
 
     async def stop_task_by_name(self, crawler: FastCrawler, task_name: str):
-        task = await self.get_process_by_task(
+        process = await self.get_process_by_task(
             crawler=crawler,
             task_name=task_name,
         )
-        await task.stop()
+        await process.stop()
 
     async def update_task_by_name(
         self, crawler: FastCrawler, task_name: str, settings: TaskSettings

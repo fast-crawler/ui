@@ -1,10 +1,10 @@
-from typing import Callable, Literal, Any
 import datetime
+from typing import Any, Callable, Literal
 
-from pydantic import Field
-from fastcrawler import Depends, FastCrawler, BaseModel
-from fastcrawler.schedule.schema import Task
+from fastcrawler import BaseModel, Depends, FastCrawler
 from fastcrawler.core import Process
+from fastcrawler.schedule.schema import Task
+from pydantic import Field
 
 
 class Unset:
@@ -52,6 +52,7 @@ class SpiderRepository:
     def get_controller(self, crawler: FastCrawler):
         """Retrieves process controller from the crawler"""
         self.crawlers.add(crawler)
+        assert crawler.controller is not None
         return crawler.controller
 
     async def get_tasks(self, crawler: FastCrawler):
@@ -60,22 +61,22 @@ class SpiderRepository:
         Returns:
             list[Task]
         """
-        self.crawlers.add(crawler)
-        return await crawler.controller.app.get_all_tasks()
+        controller = self.get_controller(crawler)
+        return await controller.app.get_all_tasks()
 
-    async def add_task_to_crawler(self, crawler: FastCrawler, task_func: Callable, settings: Task):
-        """Add a task to the crawler.
+    # async def add_task_to_crawler(self, crawler: FastCrawler, task_func: Callable, settings: Task):
+    #     """Add a task to the crawler.
 
-        Args:
-            task_func (Callable): The task function
-            settings (Task): The task settings
+    #     Args:
+    #         task_func (Callable): The task function
+    #         settings (Task): The task settings
 
-        Returns:
-            None
-        """
-        self.crawlers.add(crawler)
-        await crawler.controller.add_task(task_func, settings)
-        return None
+    #     Returns:
+    #         None
+    #     """
+    #     controller = self.get_controller(crawler)
+    #     await controller.add_task(task_func, settings)
+    #     return None
 
     async def change_task_schedule_from_crawler(
         self, crawler: FastCrawler, task_name: str, schedule: str
@@ -89,8 +90,8 @@ class SpiderRepository:
         Returns:
             None
         """
-        self.crawlers.add(crawler)
-        await crawler.controller.change_task_schedule(task_name, schedule)
+        controller = self.get_controller(crawler)
+        await controller.change_task_schedule(task_name, schedule)
         return None
 
     async def toggle_task_from_crawler(self, crawler: FastCrawler, task_name: str) -> None:
@@ -99,8 +100,8 @@ class SpiderRepository:
         Returns:
             None
         """
-        self.crawlers.add(crawler)
-        await crawler.controller.toggle_task(task_name)
+        controller = self.get_controller(crawler)
+        await controller.toggle_task(task_name)
         return None
 
     async def update_task(
@@ -115,10 +116,11 @@ class SpiderRepository:
         Returns:
             Task | None
         """
-        self.crawlers.add(crawler)
+        self.get_controller(crawler)
         new_task_settings = task_settings.model_dump()
-        task = await self.get_task_by_name(crawler, task_name)
-        if task is not None:
+        result = await self.get_process_by_task_name(crawler, task_name)
+        if result is not None:
+            process, task = result
             for key, value in new_task_settings.items():
                 if value is not _UNSET:
                     setattr(task, key, value)
@@ -132,8 +134,8 @@ class SpiderRepository:
         Returns:
             Dict[Process, Task]
         """
-        self.crawlers.add(crawler)
-        session_tasks = crawler.controller.app.get_all_session_tasks()
+        controller = self.get_controller(crawler)
+        session_tasks = controller.app.get_all_session_tasks()
         crawler_processes = crawler.crawlers
 
         processes = {
@@ -145,19 +147,17 @@ class SpiderRepository:
         }
         return processes
 
-    async def get_task_by_name(self, crawler: FastCrawler, task_name: str) -> Task | None:
-        """Get task by task_name from the crawler.
+    async def get_process_by_task_name(
+        self, crawler: FastCrawler, task_name: str
+    ) -> tuple[Process, Task] | None:
+        """Get a process and task by task_name from the crawler.
 
         Returns:
-            Task | None
+            tuple[Process, Task] | None
         """
         self.crawlers.add(crawler)
-        tasks = [
-            task
-            for task in self.get_tasks_in_processes(crawler=crawler).values()
-            if task.name == task_name
-        ]
-        if len(tasks) > 0:
-            assert len(tasks) == 1, f"There is more than one task by task_name: {task_name}"
-            return tasks[0]
+        processes = self.get_tasks_in_processes(crawler=crawler)
+        for process, task in processes.items():
+            if task.name == task_name:
+                return process, task
         return None
