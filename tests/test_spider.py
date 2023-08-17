@@ -73,7 +73,9 @@ def test_update_task(client: TestClient):
         "description": "sample Description",
     }
 
-    response = client.post(f"/update_task?task_name={task_name}", data=json.dumps(data))
+    response = client.post(
+        f"/update_task?task_name={task_name}", data=json.dumps(data)  # type: ignore
+    )
     content = response.json()
     assert response.status_code == 200
     assert len(content) == 11

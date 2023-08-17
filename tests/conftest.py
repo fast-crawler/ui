@@ -52,20 +52,20 @@ async def get_urls():
 
 def get_fastcrawler() -> FastCrawler:
     crawler = FastCrawler(
-        crawlers=(
+        crawlers=[
             Process(
-                spider=MockSpider(),
+                spider=MockSpider(),  # type: ignore
                 cond="every 1 minute",
             ),
             Process(
-                spider=MockSpider(),
+                spider=MockSpider(),  # type: ignore
                 cond="every 3 minute",
             ),
             Process(
-                spider=MockSpider(),
+                spider=MockSpider(),  # type: ignore
                 cond="every 5 minute",
             ),
-        )
+        ],
     )
     return crawler
 
