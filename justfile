@@ -1,3 +1,6 @@
+#  use PowerShell instead of sh:
+# set shell := ["powershell.exe", "-c"]
+
 run:
     cd tests && /usr/local/bin/python3 test_integration.py
 
