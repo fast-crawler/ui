@@ -5,4 +5,4 @@ install BRANCH="develop":
     pip install git+https://github.com/fast-crawler/fastcrawler.git@{{BRANCH}} --force-reinstall
 
 test arg=".":
-    pytest  --tb=short  -v --show-capture stdout -k {{arg}} --cov=fastcrawler_ui
+    pytest  --tb=short  -v --show-capture stdout --cov=fastcrawler_ui --cov-report term-missing -k {{arg}}
