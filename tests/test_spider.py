@@ -50,6 +50,10 @@ def test_start_task(client: TestClient):
 def test_task_invalid(client: TestClient):
     response = client.post("/start_task?task_name=SHOULD_NOT_FIND")
     assert response.status_code == 400
+    response = client.post("/stop_task?task_name=SHOULD_NOT_FIND")
+    assert response.status_code == 400
+    response = client.post(f"/toggle_task?task_name=SHOULD_NOT_FIND")
+    assert response.status_code == 400
 
 
 def test_toggle_task(client: TestClient):
