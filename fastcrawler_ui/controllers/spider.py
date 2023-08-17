@@ -39,12 +39,18 @@ class SpiderController:
 
     async def update_task_by_name(
         self, crawler: FastCrawler, task_name: str, settings: TaskSettings
-    ) -> Task | None:
-        return await self.spider_repo.update_task(
+    ) -> Task:
+        task = await self.spider_repo.update_task(
             crawler=crawler,
             task_name=task_name,
             task_settings=settings,
         )
+        if task is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Task {task_name!r} not found",
+            )
+        return task
 
     async def toggle_task_by_name(self, crawler: FastCrawler, task_name: str) -> Task | None:
         await self.spider_repo.toggle_task_from_crawler(
@@ -52,3 +58,10 @@ class SpiderController:
             task_name=task_name,
         )
         return None
+
+    async def change_task_schedule(self, crawler: FastCrawler, task_name: str, schedule: str):
+        return await self.spider_repo.change_task_schedule_from_crawler(
+            crawler=crawler,
+            task_name=task_name,
+            schedule=schedule,
+        )

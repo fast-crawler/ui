@@ -36,7 +36,7 @@ async def clients(
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
-    clients endpoint for retrieves crawler tasks.
+    The /all endpoint is used to retrieve crawler tasks.
 
     \f
     :param items: list of Task.
@@ -53,7 +53,7 @@ async def stop_task(
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
-    stop_task endpoint for stops a crawler task.
+    The /stop_task endpoint is used to stop a crawler task.
 
 
     """
@@ -68,7 +68,7 @@ async def start_task(
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
-    start_task endpoint for starts a crawler task.
+    The /start_task endpoint is used to start a crawler task.
 
 
     """
@@ -83,7 +83,7 @@ async def toggle_task(
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
-    toggle_task endpoint for toggle a crawler task (start/stop).
+    The /toggle_task endpoint is used to toggle a crawler task (start/stop).
 
 
     """
@@ -99,10 +99,30 @@ async def update_task(
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
-    update_task endpoint for update a crawler task.
+    The /update_task endpoint is used to update a crawler task.
 
 
     """
     return await spider_controller(spider_repository).update_task_by_name(
         crawler, task_name, task_settings
+    )
+
+
+@spider_router.post(
+    "/change_task_schedule", response_model=TaskJson, status_code=status.HTTP_200_OK
+)
+async def change_task_schedule(
+    task_name: str,
+    task_schedule: str,
+    crawler: FastCrawler = Depends(get_crawler),
+    spider_repository: SpiderRepository = Depends(get_spider_repository),
+    spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
+):
+    """
+    The /change_task_schedule endpoint is used to change the schedule of a crawler task.
+
+
+    """
+    return await spider_controller(spider_repository).change_task_schedule(
+        crawler, task_name, task_schedule
     )

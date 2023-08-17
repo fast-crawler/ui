@@ -80,7 +80,7 @@ class SpiderRepository:
 
     async def change_task_schedule_from_crawler(
         self, crawler: FastCrawler, task_name: str, schedule: str
-    ) -> None:
+    ) -> Task:
         """Change task schedule in the crawler.
 
         Args:
@@ -91,8 +91,7 @@ class SpiderRepository:
             None
         """
         controller = self.get_controller(crawler)
-        await controller.change_task_schedule(task_name, schedule)
-        return None
+        return await controller.change_task_schedule(task_name, schedule)
 
     async def toggle_task_from_crawler(self, crawler: FastCrawler, task_name: str) -> None:
         """Toggle task schedule in the crawler.
