@@ -1,0 +1,27 @@
+.base-frame {
+  height: 100%;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+
+  @media screen and (min-width: 1024px) {
+    padding: 0 36px;
+  }
+
+  .header {
+    height: 94px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__lang {
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .contain {
+    flex-grow: 1;
+    overflow: auto;
+  }
+}
