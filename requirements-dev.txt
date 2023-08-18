@@ -1,0 +1,39 @@
+aiofile==3.8.7
+aiohttp==3.8.5
+aiosignal==1.3.1
+annotated-types==0.5.0
+anyio==3.7.1
+async-timeout==4.0.2
+attrs==23.1.0
+caio==0.9.12
+certifi==2023.7.22
+charset-normalizer==3.2.0
+click==8.1.6
+colorama==0.4.6
+fastapi==0.100.1
+fastcrawler @ git+https://github.com/fast-crawler/fastcrawler.git@cebf63fbe60aa3ffad72ae3208a026ef5a007937
+frozenlist==1.4.0
+h11==0.14.0
+httpcore==0.17.3
+httpx==0.24.1
+idna==3.4
+iniconfig==2.0.0
+lxml==4.9.3
+multidict==6.0.4
+mypy==1.4.1
+mypy-extensions==1.0.0
+packaging==23.1
+pluggy==1.2.0
+pydantic==2.1.1
+pydantic_core==2.4.0
+pytest==7.4.0
+pytest-asyncio==0.21.1
+python-dateutil==2.8.2
+redbird @ git+https://github.com/ManiMozaffar/red-bird@b77617ae824cbe8180c78af41e7a8deb5b8f302d
+rocketry @ git+https://github.com/ManiMozaffar/rocketry@9e94520d66ac079bd4e39a48bd1c1b5f35453b48
+six==1.16.0
+sniffio==1.3.0
+starlette==0.27.0
+typing_extensions==4.7.1
+uvicorn==0.23.2
+yarl==1.9.2
