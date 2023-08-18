@@ -1,46 +1,15 @@
-import { useParams } from "react-router-dom";
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Filler,
-  Legend,
-  ScriptableContext,
-} from "chart.js";
-
-import { CHART_OPTIONS } from "../../constants";
-import BaseFrame from "../../components/Base/Frame";
 import { useState } from "react";
+import { useParams } from "react-router-dom";
+
+import BaseFrame from "../../components/Base/Frame";
+import BaseChart from "../../components/Base/Chart";
 
 function SpiderDetailsPage() {
-  ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Filler,
-    Legend
-  );
-
   const { spiderName } = useParams();
 
   const requestsLabels = ["1", "2", "3", "4", "5", "6"];
   const [requests] = useState([20, 16, 5, 38, 30, 22]);
 
-  const setBackground = (context: ScriptableContext<"line">) => {
-    const ctx = context.chart.ctx;
-    const gradient = ctx.createLinearGradient(0, 0, 0, 250);
-    gradient.addColorStop(0, "rgba(27, 89, 248, 0.2)");
-    gradient.addColorStop(1, "transparent");
-    return gradient;
-  };
   return (
     <div id="spiderDetails">
       <BaseFrame title={spiderName!} isBack>
@@ -85,23 +54,7 @@ function SpiderDetailsPage() {
           <div className="main-card w-full xl:w-3/5 px-10 py-7">
             <h3 className="text-xl font-semibold">request per second</h3>
             <div className="divider my-3"></div>
-            <Line
-              options={CHART_OPTIONS}
-              data={{
-                labels: requestsLabels,
-                datasets: [
-                  {
-                    fill: true,
-                    label: "requests",
-                    data: requests,
-                    pointBackgroundColor: "#1b59f8",
-                    borderColor: "#1b59f8",
-                    backgroundColor: setBackground,
-                    // cubicInterpolationMode: "monotone",
-                  },
-                ],
-              }}
-            />
+            <BaseChart data={requests} labels={requestsLabels} />
           </div>
         </div>
       </BaseFrame>
