@@ -15,7 +15,6 @@ export const CHART_OPTIONS: any = {
       },
     },
     tooltip: {
-      rtl: true,
       bodyFont: { family: "Inter" },
       padding: {
         x: 20,
