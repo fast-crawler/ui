@@ -6,18 +6,19 @@ class Message(BaseModel):
     """
     Represents a message sent over WebSocket.
     """
+
     content: str
     sender: str
 
 
-class ConnectionManager:
+class ConnectionRepository:
     """
     Manages WebSocket connections for the FastAPI application.
     """
 
     def __init__(self):
         """
-        Initializes the ConnectionManager.
+        Initializes the ConnectionRepository.
         """
         self.active_connections: set[WebSocket] = set()
 
