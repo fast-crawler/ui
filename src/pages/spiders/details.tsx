@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import Icon from "@mdi/react";
+import { mdiInformationOutline } from "@mdi/js";
 
 import BaseFrame from "../../components/Base/Frame";
 import BaseChart from "../../components/Base/Chart";
+import BaseModal from "../../components/Base/Modal";
 
 function SpiderDetailsPage() {
   const { spiderName } = useParams();
+
+  const [confirmDialog, setConfirmDialog] = useState<boolean>(false);
 
   const requestsLabels = ["1", "2", "3", "4", "5", "6"];
   const [requests] = useState([20, 16, 5, 38, 30, 22]);
@@ -36,7 +41,10 @@ function SpiderDetailsPage() {
           <div className="main-card w-full xl:w-2/5 px-10 py-7">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold">Spider details</h3>
-              <button className="btn-primary text-white bg-error py-1">
+              <button
+                className="btn-primary text-white bg-error py-1"
+                onClick={() => setConfirmDialog(true)}
+              >
                 Stop
               </button>
             </div>
@@ -91,6 +99,30 @@ function SpiderDetailsPage() {
           ))}
         </div>
       </BaseFrame>
+      <BaseModal isOpen={confirmDialog} setIsOpen={setConfirmDialog}>
+        <div className="flex flex-col items-center gap-4">
+          <Icon
+            color={"var(--color-primary)"}
+            path={mdiInformationOutline}
+            size={2}
+          />
+          <h3 className="text-xl font-semibold">Are you sure !</h3>
+          <h4 className="text-text text-center font-medium">
+            by performing this action spider will be started/stopped
+          </h4>
+          <div className="flex w-full gap-4">
+            <button
+              className="btn-primary w-1/2"
+              onClick={() => setConfirmDialog(false)}
+            >
+              Cancel
+            </button>
+            <button className="btn-primary w-1/2 text-white bg-primary">
+              Confirm
+            </button>
+          </div>
+        </div>
+      </BaseModal>
     </div>
   );
 }
