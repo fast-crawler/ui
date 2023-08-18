@@ -10,10 +10,28 @@ function SpiderDetailsPage() {
   const requestsLabels = ["1", "2", "3", "4", "5", "6"];
   const [requests] = useState([20, 16, 5, 38, 30, 22]);
 
+  const logs = [
+    {
+      id: 1,
+      date: "2023/08/06 - 15:45:27",
+      text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+    },
+    {
+      id: 2,
+      date: "2023/08/06 - 15:45:27",
+      text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+    },
+    {
+      id: 3,
+      date: "2023/08/06 - 15:45:27",
+      text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
+    },
+  ];
+
   return (
     <div id="spiderDetails">
       <BaseFrame title={spiderName!} isBack>
-        <div className="flex flex-col xl:flex-row gap-8 w-full">
+        <div className="flex flex-col xl:flex-row gap-8 w-full mb-8">
           {/*---------- spider details section ----------*/}
           <div className="main-card w-full xl:w-2/5 px-10 py-7">
             <div className="flex justify-between items-center">
@@ -56,6 +74,21 @@ function SpiderDetailsPage() {
             <div className="divider my-3"></div>
             <BaseChart data={requests} labels={requestsLabels} />
           </div>
+        </div>
+        {/*---------- spider logs section ----------*/}
+        <div className="main-card w-full px-10 py-7 mb-10">
+          <h3 className="text-xl font-semibold">request per second</h3>
+          <div className="divider my-3"></div>
+          {logs.map((log, index) => (
+            <div
+              key={log.id}
+              className="spider-logs-row flex-wrap lg:flex-nowrap"
+            >
+              <h4 className="mr-5">{index + 1}</h4>
+              <h4 className="mr-16">{log.date}</h4>
+              <h5>{log.text}</h5>
+            </div>
+          ))}
         </div>
       </BaseFrame>
     </div>

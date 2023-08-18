@@ -14,7 +14,7 @@
   }
 
   h5 {
-    color: var(--color-secondary-text);
+    color: var(--color-text);
     font-weight: 500;
     font-size: 16px;
   }
@@ -26,5 +26,22 @@
     border-radius: 8px;
     background: var(--color-bg-success);
     color: var(--color-success);
+  }
+}
+
+.spider-logs-row {
+  display: flex;
+  margin-bottom: 16px;
+
+  h4 {
+    white-space: nowrap;
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  h5 {
+    color: var(--color-text);
+    font-weight: 500;
+    font-size: 16px;
   }
 }
