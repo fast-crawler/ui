@@ -1,0 +1,26 @@
+.spider-details-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  h4 {
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  h5 {
+    color: var(--color-secondary-text);
+    font-weight: 500;
+    font-size: 16px;
+  }
+
+  &__status {
+    padding: 4px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    background: var(--color-bg-success);
+    color: var(--color-success);
+  }
+}
