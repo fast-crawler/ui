@@ -5,7 +5,7 @@ function SpiderDetailsPage() {
   const { spiderName } = useParams();
   return (
     <div id="spiderDetails">
-      <BaseFrame title={spiderName!}>
+      <BaseFrame title={spiderName!} isBack>
         <div>Heoolo</div>
       </BaseFrame>
     </div>
