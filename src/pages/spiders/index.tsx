@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Icon } from "@mdi/react";
 import { mdiMagnify } from "@mdi/js";
 
-import BaseFrame from "../components/Base/Frame";
-import SpidersFilter from "../components/Spiders/FIlter";
-import SpidersDataTable from "../components/Spiders/DataTable";
+import BaseFrame from "../../components/Base/Frame";
+import SpidersFilter from "../../components/Spiders/FIlter";
+import SpidersDataTable from "../../components/Spiders/DataTable";
 
 function spiders() {
   const [selectedSort, setSelectedSort] = useState<number>(1);

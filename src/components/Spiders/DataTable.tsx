@@ -1,3 +1,6 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
+
 function SpidersDataTable() {
   const spiders = [
     {
@@ -80,6 +83,12 @@ function SpidersDataTable() {
     },
   };
 
+  const navigate = useNavigate();
+
+  const handleCheckboxClick = (event: React.MouseEvent<HTMLInputElement>) => {
+    event.stopPropagation();
+  };
+
   return (
     <div
       className="main-card px-4 w-full overflow-y-auto"
@@ -100,9 +109,17 @@ function SpidersDataTable() {
         </thead>
         <tbody>
           {spiders.map((spider, index) => (
-            <tr key={spider.id} className="hover:bg-bg-primary">
+            <tr
+              key={spider.id}
+              className="hover:bg-bg-primary"
+              onClick={() => navigate(`/spiders/${spider.name}`)}
+            >
               <td className="pl-5">
-                <input type="checkbox" className="h-4 w-4 accent-primary" />
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 accent-primary"
+                  onClick={handleCheckboxClick}
+                />
               </td>
               <td>{index + 1}</td>
               <td>{spider.name}</td>

@@ -3,7 +3,8 @@ import { mdiViewGrid, mdiSpider } from "@mdi/js";
 
 import { Router } from "../constants/types";
 import IndexPage from "../pages/index";
-import SpidersPage from "../pages/spiders";
+import SpidersPage from "../pages/spiders/index";
+import SpiderDetailsPage from "../pages/spiders/details";
 
 export const routers: Router[] = [
   {
@@ -21,5 +22,12 @@ export const routers: Router[] = [
     isShowSideBar: true,
     hasChild: false,
     element: <SpidersPage />,
+  },
+  {
+    path: "/spiders/:spiderName",
+    name: "SpiderDetails",
+    isShowSideBar: false,
+    hasChild: false,
+    element: <SpiderDetailsPage />,
   },
 ];
