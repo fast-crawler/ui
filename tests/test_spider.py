@@ -24,7 +24,7 @@ def test_all(client: TestClient):
     assert response.status_code == 200
     assert len(content) > 0
     assert len(content[0]) == 11
-    assert content[0]["name"].startswith("MySpider")
+    assert content[0]["name"].startswith("MockSpider")
 
 
 def test_stop_task(client: TestClient):

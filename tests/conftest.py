@@ -11,7 +11,7 @@ from fastcrawler import BaseModel, Depends, FastCrawler, Process, XPATHField
 from fastcrawler_ui.core.fastapi.app import app
 from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
 from fastcrawler_ui.repository.ws import ConnectionRepository
-from tests.spider_mock import MySpider as MockSpider
+from tests.spider_mock import MockSpider
 
 started_crawler_flag = False
 
@@ -54,15 +54,15 @@ def get_fastcrawler() -> FastCrawler:
     crawler = FastCrawler(
         crawlers=[
             Process(
-                spider=MockSpider(),  # type: ignore
+                spider=MockSpider(),
                 cond="every 1 minute",
             ),
             Process(
-                spider=MockSpider(),  # type: ignore
+                spider=MockSpider(),
                 cond="every 3 minute",
             ),
             Process(
-                spider=MockSpider(),  # type: ignore
+                spider=MockSpider(),
                 cond="every 5 minute",
             ),
         ],

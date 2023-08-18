@@ -1,5 +1,6 @@
-class MySpider:
-    is_stopped = False
+from fastcrawler import Spider
 
-    async def start(self, silent: bool = True):  # type: ignore
+
+class MockSpider(Spider):
+    async def start(self, silent: bool = True):
         pass
