@@ -1,9 +1,15 @@
+import { useNavigate } from "react-router-dom";
+
 function SpidersTable() {
+  const navigate = useNavigate();
+
   return (
-    <div className="main-card px-4 md:px-9 py-5 w-full overflow-x-auto">
+    <div className="main-card px-9 py-5 w-full overflow-x-auto">
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-xl font-semibold">Last spiders</h3>
-        <button className="btn-primary">See All</button>
+        <button className="btn-primary" onClick={() => navigate("/spiders")}>
+          See All
+        </button>
       </div>
       <div>
         <table className="table-auto min-w-full">
