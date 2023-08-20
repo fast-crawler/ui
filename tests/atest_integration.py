@@ -34,21 +34,23 @@ class MySpider(Spider):
         total_crawled += 1
 
 
+every: int = 10
+
 crawler = app = FastCrawler(
-    crawlers=(
+    crawlers=[
         Process(
-        spider=MySpider(),
-        cond="every 1 minute",
+            spider=MySpider(),
+            cond=f"every {every} minute",
         ),
         Process(
-        spider=MySpider(),
-        cond="every 3 minute",
+            spider=MySpider(),
+            cond=f"every {int(every*1.5)} minute",
         ),
         Process(
-        spider=MySpider(),
-        cond="every 5 minute",
+            spider=MySpider(),
+            cond=f"every {every*2} minute",
         ),
-    )
+    ]
 )
 
 run(crawler=crawler, uvicorn_config={"port": 8001})
