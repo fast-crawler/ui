@@ -1,7 +1,8 @@
 import datetime
-from typing import Any, Callable, Literal
+from typing import Any, Literal
 
-from fastcrawler import BaseModel, Depends, FastCrawler
+from fastapi import HTTPException, status
+from fastcrawler import BaseModel, FastCrawler
 from fastcrawler.core import Process
 from fastcrawler.schedule.schema import Task
 from pydantic import Field
@@ -37,9 +38,8 @@ class TaskSettings(BaseModel):
     start_cond: Any | Unset = _UNSET
     end_cond: Any | Unset = _UNSET
 
-    model_config = {
-        "arbitrary_types_allowed": True,
-    }
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class SpiderRepository:
@@ -80,7 +80,7 @@ class SpiderRepository:
 
     async def change_task_schedule_from_crawler(
         self, crawler: FastCrawler, task_name: str, schedule: str
-    ) -> Task:
+    ):
         """Change task schedule in the crawler.
 
         Args:
@@ -91,7 +91,7 @@ class SpiderRepository:
             None
         """
         controller = self.get_controller(crawler)
-        return await controller.change_task_schedule(task_name, schedule)
+        await controller.change_task_schedule(task_name, schedule)
 
     async def toggle_task_from_crawler(self, crawler: FastCrawler, task_name: str) -> None:
         """Toggle task schedule in the crawler.
@@ -101,7 +101,6 @@ class SpiderRepository:
         """
         controller = self.get_controller(crawler)
         await controller.toggle_task(task_name)
-        return None
 
     async def update_task(
         self, crawler: FastCrawler, task_name: str, task_settings: TaskSettings
@@ -116,10 +115,10 @@ class SpiderRepository:
             Task | None
         """
         self.get_controller(crawler)
-        new_task_settings = task_settings.model_dump()
+        new_task_settings = task_settings.model_dump(exclude_unset=True)
         result = await self.get_process_by_task_name(crawler, task_name)
         if result is not None:
-            process, task = result
+            _, task = result
             for key, value in new_task_settings.items():
                 if value is not _UNSET:
                     setattr(task, key, value)
@@ -148,7 +147,7 @@ class SpiderRepository:
 
     async def get_process_by_task_name(
         self, crawler: FastCrawler, task_name: str
-    ) -> tuple[Process, Task] | None:
+    ) -> tuple[Process, Task]:
         """Get a process and task by task_name from the crawler.
 
         Returns:
@@ -159,4 +158,7 @@ class SpiderRepository:
         for process, task in processes.items():
             if task.name == task_name:
                 return process, task
-        return None
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Task {task_name!r} not found",
+        )
