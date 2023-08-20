@@ -2,7 +2,7 @@
 # set shell := ["powershell.exe", "-c"]
 
 run:
-    cd tests && /usr/local/bin/python3 test_integration.py
+    cd tests && python atest_integration.py
 
 install BRANCH="develop":
     pip install git+https://github.com/fast-crawler/fastcrawler.git@{{BRANCH}} --force-reinstall
