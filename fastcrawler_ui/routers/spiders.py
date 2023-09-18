@@ -1,9 +1,9 @@
 from typing import Any, Type
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Body, Depends, status
 from fastcrawler import FastCrawler
 from fastcrawler.schedule.schema import Task
-from pydantic import FieldValidationInfo, field_validator
+from pydantic import BaseModel, FieldValidationInfo, field_validator
 
 from fastcrawler_ui.controllers.spider import SpiderController
 from fastcrawler_ui.core.fastapi.depends import get_crawler
@@ -18,6 +18,10 @@ def get_spider_repository():
 
 def spider_controller_cls() -> Type[SpiderController]:
     return SpiderController
+
+
+class TaskInput(BaseModel):
+    name: str
 
 
 class TaskJson(Task):
@@ -47,7 +51,7 @@ async def clients(
 
 @spider_router.post("/stop_task", status_code=status.HTTP_204_NO_CONTENT)
 async def stop_task(
-    task_name: str,
+    task: TaskInput = Body(),
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
@@ -57,27 +61,25 @@ async def stop_task(
 
 
     """
-    await spider_controller(spider_repository).stop_task_by_name(crawler, task_name)
+    await spider_controller(spider_repository).stop_task_by_name(crawler, task.name)
 
 
 @spider_router.post("/start_task", status_code=status.HTTP_204_NO_CONTENT)
 async def start_task(
-    task_name: str,
+    task: TaskInput = Body(),
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
     The /start_task endpoint is used to start a crawler task.
-
-
     """
-    await spider_controller(spider_repository).start_task_by_name(crawler, task_name)
+    await spider_controller(spider_repository).start_task_by_name(crawler, task.name)
 
 
 @spider_router.post("/toggle_task", status_code=status.HTTP_204_NO_CONTENT)
 async def toggle_task(
-    task_name: str,
+    task: TaskInput = Body(),
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
@@ -87,13 +89,17 @@ async def toggle_task(
 
 
     """
-    return await spider_controller(spider_repository).toggle_task_by_name(crawler, task_name)
+    return await spider_controller(spider_repository).toggle_task_by_name(crawler, task.name)
+
+
+class TaskSettingInput(BaseModel):
+    settings: TaskSettings
+    name: str
 
 
 @spider_router.post("/update_task", response_model=TaskJson, status_code=status.HTTP_200_OK)
 async def update_task(
-    task_name: str,
-    task_settings: TaskSettings,
+    task: TaskSettingInput = Body(),
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
@@ -104,16 +110,18 @@ async def update_task(
 
     """
     return await spider_controller(spider_repository).update_task_by_name(
-        crawler, task_name, task_settings
+        crawler, task.name, task.settings
     )
 
 
-@spider_router.post(
-    "/change_task_schedule", response_model=TaskJson, status_code=status.HTTP_200_OK
-)
+class TaskScheduleInput(BaseModel):
+    name: str
+    schedule: str
+
+
+@spider_router.post("/change_task_schedule", status_code=status.HTTP_204_NO_CONTENT)
 async def change_task_schedule(
-    task_name: str,
-    task_schedule: str,
+    task: TaskScheduleInput = Body(),
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
@@ -123,6 +131,7 @@ async def change_task_schedule(
 
 
     """
-    return await spider_controller(spider_repository).change_task_schedule(
-        crawler, task_name, task_schedule
+    await spider_controller(spider_repository).change_task_schedule(
+        crawler, task.name, task.schedule
     )
+    await spider_controller(spider_repository).get_task(crawler, task_name=task.name)

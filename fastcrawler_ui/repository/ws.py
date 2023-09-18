@@ -1,3 +1,7 @@
+import asyncio
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator, Self
+
 from fastapi import WebSocket
 from pydantic import BaseModel
 
@@ -12,15 +16,31 @@ class Message(BaseModel):
 
 
 class ConnectionRepository:
+    active_connections: set[WebSocket] = set()
+    messages: list[Message] = []
+
     """
     Manages WebSocket connections for the FastAPI application.
     """
 
-    def __init__(self):
+    @asynccontextmanager
+    async def open_connection(self, websocket: WebSocket) -> AsyncGenerator[Self, None]:
         """
-        Initializes the ConnectionRepository.
+        Context manager to manage WebSocket connections.
+
+        Args:
+            websocket (WebSocket): The WebSocket instance representing the client connection.
+
+        Yields:
+            None
         """
-        self.active_connections: set[WebSocket] = set()
+        await self.connect(websocket)
+
+        try:
+            while True:
+                yield self
+        finally:
+            self.disconnect(websocket)
 
     async def connect(self, websocket: WebSocket):
         """
@@ -33,7 +53,7 @@ class ConnectionRepository:
             None
         """
         await websocket.accept()
-        self.active_connections.add(websocket)
+        ConnectionRepository.active_connections.add(websocket)
 
     def disconnect(self, websocket: WebSocket):
         """
@@ -45,7 +65,7 @@ class ConnectionRepository:
         Returns:
             None
         """
-        self.active_connections.remove(websocket)
+        ConnectionRepository.active_connections.remove(websocket)
 
     async def send_personal_message(self, message: Message, websocket: WebSocket):
         """
@@ -60,7 +80,7 @@ class ConnectionRepository:
         """
         await websocket.send_json(message.model_dump())
 
-    async def broadcast(self, message: Message):
+    async def broadcast(self, exclude_connection: set[WebSocket] | None = None):
         """
         Broadcasts a message to all connected WebSocket clients.
 
@@ -70,5 +90,13 @@ class ConnectionRepository:
         Returns:
             None
         """
-        for connection in self.active_connections:
-            await connection.send_json(message.model_dump())
+
+        await asyncio.gather(
+            *[
+                connection.send_json(message.model_dump())
+                for message in ConnectionRepository.messages
+                for connection in ConnectionRepository.active_connections
+                if not exclude_connection or connection not in exclude_connection
+            ]
+        )
+        ConnectionRepository.messages = []

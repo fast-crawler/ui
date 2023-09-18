@@ -19,4 +19,4 @@ async def clients(
     Returns:
         None
     """
-    await ws_controller.get_connection(websocket)
+    await ws_controller.get_and_send_message(websocket)

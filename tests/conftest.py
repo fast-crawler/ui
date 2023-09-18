@@ -6,12 +6,12 @@ from unittest.mock import AsyncMock
 import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
-from fastcrawler import BaseModel, Depends, FastCrawler, Process, XPATHField
+from fastcrawler import BaseModel, FastCrawler, Process, XPATHField
 
 from fastcrawler_ui.core.fastapi.app import app
 from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
 from fastcrawler_ui.repository.ws import ConnectionRepository
-from tests.spider_mock import MockSpider
+from tests.shared.mock import MockSpider
 
 started_crawler_flag = False
 
@@ -26,15 +26,6 @@ def event_loop():
     loop = policy.new_event_loop()
     yield loop
     loop.close()
-
-
-# async def patch_run(self) -> None:
-#     """Prepare all crawlers in background explicitly with schedule without serving"""
-#     for crawler in self.crawlers:
-#         crawler.controller = self.controller
-#         await crawler.add_spiders()
-
-#     return None
 
 
 class PersonData(BaseModel):
