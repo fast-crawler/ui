@@ -66,7 +66,11 @@ function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
                 <tr
                   key={spider.name}
                   className="hover:bg-bg-primary"
-                  onClick={() => navigate(`/spiders/${spider.name}`)}
+                  onClick={() =>
+                    navigate(`/spiders/${spider.name}`, {
+                      state: { data: spider },
+                    })
+                  }
                 >
                   <td className="pl-5">
                     <input

@@ -1,21 +1,25 @@
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import Icon from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 
+import { useSpiderApi } from "../../api";
 import BaseFrame from "../../components/Base/Frame";
 import BaseChart from "../../components/Base/Chart";
 import BaseModal from "../../components/Base/Modal";
 
+let chatSocket: WebSocket = new WebSocket("ws://127.0.0.1:8001/ws");
+
 function SpiderDetailsPage() {
   const { spiderName } = useParams();
+  const { toggleTask } = useSpiderApi();
 
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false);
 
   const requestsLabels = ["1", "2", "3", "4", "5", "6"];
   const [requests] = useState([20, 16, 5, 38, 30, 22]);
 
-  const logs = [
+  const [logs, setLogs] = useState([
     {
       id: 1,
       date: "2023/08/06 - 15:45:27",
@@ -31,7 +35,55 @@ function SpiderDetailsPage() {
       date: "2023/08/06 - 15:45:27",
       text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
     },
-  ];
+  ]);
+
+  const { state } = useLocation();
+
+  useEffect(() => {
+    chatSocket.onopen = function (e: any) {
+      chatSocket?.send(
+        JSON.stringify({
+          content: "begin chat !!!!",
+          sender: navigator.userAgent,
+        })
+      );
+      console.log("success");
+    };
+
+    chatSocket.onmessage = function (e: any) {
+      const data = JSON.parse(e.data);
+      setLogs((prevLogs) => [
+        {
+          id: prevLogs.length + 1,
+          date: new Date().toLocaleString(),
+          text: `${data["sender"]} -> ${data["content"]}`,
+        },
+        ...prevLogs,
+      ]);
+    };
+
+    chatSocket.onclose = function (e: any) {
+      console.error("Chat socket closed unexpectedly");
+    };
+  }, []);
+
+  const toggleSpiderStatus = async () => {
+    // await toggleTask({ name: spiderName }).then((res) => {
+    //   setConfirmDialog(false);
+    //   state.data.disabled = !state.data.disabled;
+    // });
+    document.getElementById("confirm-button")!.onclick = function (e) {
+      const message = state.data.disabled ? "spider started" : "spider stopped";
+      chatSocket?.send(
+        JSON.stringify({
+          content: message,
+          sender: navigator.userAgent,
+        })
+      );
+      setConfirmDialog(false);
+      state.data.disabled = !state.data.disabled;
+    };
+  };
 
   return (
     <div id="spiderDetails">
@@ -41,18 +93,29 @@ function SpiderDetailsPage() {
           <div className="main-card w-full xl:w-2/5 px-10 py-7">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold">Spider details</h3>
-              <button
-                className="btn-primary text-white bg-error py-1"
-                onClick={() => setConfirmDialog(true)}
-              >
-                Stop
-              </button>
+              {state.data.disabled ? (
+                <button
+                  className="btn-primary text-white bg-success py-1"
+                  onClick={() => setConfirmDialog(true)}
+                >
+                  Start
+                </button>
+              ) : (
+                <button
+                  className="btn-primary text-white bg-error py-1"
+                  onClick={() => setConfirmDialog(true)}
+                >
+                  Stop
+                </button>
+              )}
             </div>
             <div className="divider my-3"></div>
             <div className="flex flex-col xl:justify-around h-4/5">
               <div className="spider-details-row">
                 <h4>State : </h4>
-                <span className="spider-details-row__status">Active</span>
+                <span className="spider-details-row__status">
+                  {state.data.status}
+                </span>
               </div>
               <div className="spider-details-row">
                 <h4>Started at : </h4>
@@ -117,7 +180,11 @@ function SpiderDetailsPage() {
             >
               Cancel
             </button>
-            <button className="btn-primary w-1/2 text-white bg-primary">
+            <button
+              id="confirm-button"
+              className="btn-primary w-1/2 text-white bg-primary"
+              onClick={toggleSpiderStatus}
+            >
               Confirm
             </button>
           </div>
