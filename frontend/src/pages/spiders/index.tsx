@@ -1,17 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "@mdi/react";
 import { mdiMagnify } from "@mdi/js";
 
+import { useSpiderApi } from "../../api";
+import { ISpider } from "../../constants/types";
 import BaseFrame from "../../components/Base/Frame";
 import SpidersFilter from "../../components/Spiders/FIlter";
 import SpidersDataTable from "../../components/Spiders/DataTable";
 
 function spiders() {
+  const { getSpiders } = useSpiderApi();
   const [selectedSort, setSelectedSort] = useState<number>(1);
   const [selectedState, setSelectedState] = useState<number>(1);
   const [searchName, setSearchName] = useState<string>("");
+
   const handleSearchChange = (event: any) => {
     setSearchName(event.target.value);
+  };
+
+  useEffect(() => {
+    getSpidersData();
+  }, []);
+
+  const [loading, setLoading] = useState<boolean>(false);
+  const [spiders, setSpiders] = useState<ISpider[]>([]);
+  const getSpidersData = async () => {
+    setLoading(true);
+    await getSpiders()
+      .then((res) => {
+        console.log(res.data);
+        setSpiders([...res.data]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   return (
@@ -49,7 +71,7 @@ function spiders() {
           </div>
         </div>
         {/*------------ spiders data table section ------------*/}
-        <SpidersDataTable />
+        <SpidersDataTable data={spiders} loading={loading} />
       </BaseFrame>
     </div>
   );

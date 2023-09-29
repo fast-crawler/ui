@@ -4,7 +4,7 @@ export function useSpiderApi() {
   const getSpiders = async (params: any = {}) => {
     return await request({
       url: "/all",
-      method: "post",
+      method: "get",
       params,
     });
   };
