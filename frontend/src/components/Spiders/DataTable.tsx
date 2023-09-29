@@ -92,7 +92,7 @@ function SpidersDataTable() {
   return (
     <div
       className="main-card px-4 w-full overflow-y-auto"
-      style={{ height: "540px" }}
+      style={{ height: "calc(100vh - 200px)" }}
     >
       <table className="w-full">
         <thead className="sticky top-0 bg-white">
