@@ -16,8 +16,10 @@ function SpiderDetailsPage() {
 
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false);
 
-  const requestsLabels = ["1", "2", "3", "4", "5", "6"];
-  const [requests] = useState([20, 16, 5, 38, 30, 22]);
+  const [requests, setRequest] = useState({
+    labels: ["", "", "", "", "", ""],
+    data: [0, 0, 0, 0, 0, 0],
+  });
 
   const [logs, setLogs] = useState([
     {
@@ -40,6 +42,17 @@ function SpiderDetailsPage() {
   const { state } = useLocation();
 
   useEffect(() => {
+    const interval = setInterval(() => {
+      const newDataPoint = Math.floor(Math.random() * 45);
+      setRequest((prevData) => {
+        const newData = [...prevData.data, newDataPoint];
+        const newLabels = [...prevData.labels, new Date().toLocaleTimeString()];
+        newData.splice(0, 1);
+        newLabels.splice(0, 1);
+        return { data: newData, labels: newLabels };
+      });
+    }, 2000);
+
     chatSocket.onopen = function (e: any) {
       chatSocket?.send(
         JSON.stringify({
@@ -65,13 +78,14 @@ function SpiderDetailsPage() {
     chatSocket.onclose = function (e: any) {
       console.error("Chat socket closed unexpectedly");
     };
+    return () => clearInterval(interval);
   }, []);
 
   const toggleSpiderStatus = async () => {
-    // await toggleTask({ name: spiderName }).then((res) => {
-    //   setConfirmDialog(false);
-    //   state.data.disabled = !state.data.disabled;
-    // });
+    await toggleTask({ name: spiderName }).then((res) => {
+      setConfirmDialog(false);
+      state.data.disabled = !state.data.disabled;
+    });
     document.getElementById("confirm-button")!.onclick = function (e) {
       const message = state.data.disabled ? "spider started" : "spider stopped";
       chatSocket?.send(
@@ -80,8 +94,6 @@ function SpiderDetailsPage() {
           sender: navigator.userAgent,
         })
       );
-      setConfirmDialog(false);
-      state.data.disabled = !state.data.disabled;
     };
   };
 
@@ -143,7 +155,7 @@ function SpiderDetailsPage() {
           <div className="main-card w-full xl:w-3/5 px-10 py-7">
             <h3 className="text-xl font-semibold">request per second</h3>
             <div className="divider my-3"></div>
-            <BaseChart data={requests} labels={requestsLabels} />
+            <BaseChart data={requests.data} labels={requests.labels} />
           </div>
         </div>
         {/*---------- spider logs section ----------*/}
