@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Type
 
 from fastapi import APIRouter, Body, Depends, status
@@ -22,6 +23,10 @@ def spider_controller_cls() -> Type[SpiderController]:
 
 class TaskInput(BaseModel):
     name: str
+
+
+class TasksInput(BaseModel):
+    names: list[str]
 
 
 class TaskJson(Task):
@@ -49,32 +54,45 @@ async def clients(
     return items
 
 
-@spider_router.post("/stop_task", status_code=status.HTTP_204_NO_CONTENT)
-async def stop_task(
-    task: TaskInput = Body(),
+def manage_tasks(
+    task_names: TasksInput,
+    crawler: FastCrawler,
+    spider_repository: SpiderRepository,
+    spider_controller: Type[SpiderController],
+    action: str,
+):
+    controller = spider_controller(spider_repository)
+    action_call = getattr(controller, f"{action}_task_by_name")
+
+    tasks = [action_call(crawler, task_name) for task_name in task_names.names]
+
+    return asyncio.gather(*tasks)
+
+
+@spider_router.post("/start_tasks", status_code=status.HTTP_204_NO_CONTENT)
+async def start_tasks(
+    task_names: TasksInput = Body(),
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
-    The /stop_task endpoint is used to stop a crawler task.
-
-
+    The /start_tasks endpoint is used to start a crawler task.
     """
-    await spider_controller(spider_repository).stop_task_by_name(crawler, task.name)
+    await manage_tasks(task_names, crawler, spider_repository, spider_controller, action="start")
 
 
-@spider_router.post("/start_task", status_code=status.HTTP_204_NO_CONTENT)
-async def start_task(
-    task: TaskInput = Body(),
+@spider_router.post("/stop_tasks", status_code=status.HTTP_204_NO_CONTENT)
+async def stop_tasks(
+    task_names: TasksInput = Body(),
     crawler: FastCrawler = Depends(get_crawler),
     spider_repository: SpiderRepository = Depends(get_spider_repository),
     spider_controller: Type[SpiderController] = Depends(spider_controller_cls),
 ):
     """
-    The /start_task endpoint is used to start a crawler task.
+    The /stop_tasks endpoint is used to stop a crawler task.
     """
-    await spider_controller(spider_repository).start_task_by_name(crawler, task.name)
+    await manage_tasks(task_names, crawler, spider_repository, spider_controller, action="stop")
 
 
 @spider_router.post("/toggle_task", status_code=status.HTTP_204_NO_CONTENT)

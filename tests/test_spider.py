@@ -27,8 +27,8 @@ def test_all(client: TestClient):
 def test_stop_task(client: TestClient):
     task_name = get_exist_task_name(client)
     task_before_stop = get_task_by_name(client, task_name)
-    body = {"name": task_name}
-    response = client.post("/stop_task", json=body)
+    body = {"names": [task_name]}
+    response = client.post("/stop_tasks", json=body)
     task_after_stopped = get_task_by_name(client, task_name)
     assert response.status_code == 204
     assert task_before_stop["name"] == task_after_stopped["name"]
@@ -38,8 +38,8 @@ def test_stop_task(client: TestClient):
 def test_start_task(client: TestClient):
     task_name = get_exist_task_name(client)
     task_before_start = get_task_by_name(client, task_name)
-    body = {"name": task_name}
-    response = client.post("/start_task", json=body)
+    body = {"names": [task_name]}
+    response = client.post("/start_tasks", json=body)
     task_after_start = get_task_by_name(client, task_name)
     assert response.status_code == 204
     assert task_before_start["name"] == task_after_start["name"]
@@ -47,8 +47,8 @@ def test_start_task(client: TestClient):
 
 
 def test_task_invalid(client: TestClient):
-    body = {"name": "SHOULD_NOT_FIND"}
-    response = client.post("/start_task", json=body)
+    body = {"names": ["SHOULD_NOT_FIND"]}
+    response = client.post("/start_tasks", json=body)
     assert response.status_code == 400
 
 
