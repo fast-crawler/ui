@@ -25,6 +25,11 @@ export const CHART_OPTIONS: any = {
   scales: {
     y: {
       suggestedMin: 0,
+      beginAtZero: true,
+      max: 100,
+      ticks: {
+        stepSize: 10,
+      },
     },
   },
 };

@@ -19,6 +19,8 @@ function SpiderDetailsPage() {
   const [requests, setRequest] = useState({
     labels: ["", "", "", "", "", ""],
     data: [0, 0, 0, 0, 0, 0],
+    data1: [0, 0, 0, 0, 0, 0],
+    data2: [0, 0, 0, 0, 0, 0],
   });
 
   const [logs, setLogs] = useState([
@@ -43,15 +45,27 @@ function SpiderDetailsPage() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const newDataPoint = Math.floor(Math.random() * 45);
+      const newDataPoint = Math.floor(Math.random() * 100);
+      const newDataPoint1 = Math.floor(Math.random() * 100);
+      const newDataPoint2 = Math.floor(Math.random() * 100);
       setRequest((prevData) => {
         const newData = [...prevData.data, newDataPoint];
+        const newData1 = [...prevData.data1, newDataPoint1];
+        const newData2 = [...prevData.data2, newDataPoint2];
         const newLabels = [...prevData.labels, new Date().toLocaleTimeString()];
         newData.splice(0, 1);
+        newData1.splice(0, 1);
+        newData2.splice(0, 1);
         newLabels.splice(0, 1);
-        return { data: newData, labels: newLabels };
+        return {
+          data: newData,
+          data1: newData1,
+          data2: newData2,
+          labels: newLabels,
+        };
       });
-    }, 2000);
+      console.log(requests);
+    }, 1000);
 
     chatSocket.onopen = function (e: any) {
       chatSocket?.send(
@@ -155,7 +169,14 @@ function SpiderDetailsPage() {
           <div className="main-card w-full xl:w-3/5 px-10 py-7">
             <h3 className="text-xl font-semibold">request per second</h3>
             <div className="divider my-3"></div>
-            <BaseChart data={requests.data} labels={requests.labels} />
+            <BaseChart
+              datasets={[
+                { color: "#1b59f8", label: "total", data: requests.data },
+                { color: "#b91c1c", label: "failed", data: requests.data1 },
+                { color: "#059669", label: "success", data: requests.data2 },
+              ]}
+              labels={requests.labels}
+            />
           </div>
         </div>
         {/*---------- spider logs section ----------*/}

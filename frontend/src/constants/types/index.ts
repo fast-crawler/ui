@@ -12,3 +12,9 @@ export interface Router {
   element?: ReactNode;
   children?: Router[];
 }
+
+export interface IDataSet {
+  data: string[] | number[];
+  label: string;
+  color: string;
+}

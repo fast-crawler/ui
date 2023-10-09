@@ -18,12 +18,22 @@ function index() {
           <div className="main-card w-full md:w-1/2 py-5 px-6">
             <h3 className="text-xl font-semibold">request per second</h3>
             <div className="divider my-3"></div>
-            <BaseChart data={requests} labels={requestsLabels} />
+            <BaseChart
+              datasets={[
+                { data: requests, label: "requests", color: "#1b59f8" },
+              ]}
+              labels={requestsLabels}
+            />
           </div>
           <div className="main-card w-full md:w-1/2 py-5 px-6">
             <h3 className="text-xl font-semibold">Spider running state</h3>
             <div className="divider my-3"></div>
-            <BaseChart data={spiderData} labels={spiderLabels} />
+            <BaseChart
+              datasets={[
+                { data: spiderData, label: "requests", color: "#1b59f8" },
+              ]}
+              labels={spiderLabels}
+            />
           </div>
         </div>
         <SpidersTable />
