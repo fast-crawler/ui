@@ -52,6 +52,7 @@ function BaseChart({ datasets, labels }: BaseChartProps) {
   return (
     <>
       <Line
+        className="!h-[256px] mx-auto w-full"
         options={CHART_OPTIONS}
         data={{
           labels,
