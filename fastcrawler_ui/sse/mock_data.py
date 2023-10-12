@@ -24,5 +24,15 @@ def generate_random_log():
 
 
 def generate_random_chart():
+    all_requests = random.randint(0, 99)
+    failed_requests = random.randint(0, 50)
+    success_requests = all_requests - failed_requests
     while True:
-        yield {'data': random.randint(0, 99)}
+        yield {
+            'data': {
+                'time': datetime.datetime.utcnow().isoformat(),
+                'all_requests': all_requests,
+                'successful_requests': success_requests,
+                'failed_requests': failed_requests
+                }
+            }
