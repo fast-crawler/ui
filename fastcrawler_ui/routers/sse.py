@@ -44,15 +44,45 @@ async def generate_random_chart():
         await asyncio.sleep(0.5)
 
 
+async def generate_random_crawlers_data():
+    all_crawlers = random.randint(0, 99)
+    active_crawlers = random.randint(0, 50)
+    deactive_crawlers = all_crawlers - active_crawlers
+    while True:
+        data = {
+            'data': {
+                'time': datetime.datetime.utcnow().isoformat(),
+                'all_crawlers': all_crawlers,
+                'deactive_crawlers': deactive_crawlers,
+                'active_crawlers': active_crawlers
+                }
+            }
+        yield json.dumps(data)
+        await asyncio.sleep(0.5)
+
+
+
 router = APIRouter()
 
-@router.get("/{crawler_id}/chart")
+@router.get("/{crawler_uuid}/chart")
 async def crawler_chart(crawler_id: int):
     return StreamingResponse(content=generate_random_chart(),
                              media_type='application/x-ndjson')
 
 
-@router.get("/{crawler_id}/logs")
+@router.get("/{crawler_uuid}/logs")
 async def crawler_logs(crawler_id: int):
     return StreamingResponse(content=generate_random_log(),
                              media_type='application/x-ndjson')
+
+
+@router.get("/dashboard/chart")
+async def dashboard_chart():
+    return StreamingResponse(content=generate_random_chart(),
+                             media_type='application/x-ndjson')
+
+@router.get("/dashboard/crawlers")
+async def dashboard_crawlers():
+    return StreamingResponse(content=generate_random_crawlers_data(),
+                             media_type='application/x-ndjson')
+
