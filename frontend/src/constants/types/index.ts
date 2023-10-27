@@ -25,3 +25,13 @@ export interface ILog {
   message: string;
   type: string;
 }
+
+export interface IOverviewData {
+  currentTime: string;
+  allCrawlers: number;
+  activeCrawlers: number;
+  deactiveCrawlers: number;
+  totalRequests: number;
+  successfullRequests: number;
+  failedRequests: number;
+}
