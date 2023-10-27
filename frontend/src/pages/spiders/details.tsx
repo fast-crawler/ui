@@ -4,6 +4,7 @@ import Icon from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 
 import { useSpiderApi } from "../../api";
+import { ILog } from "../../constants/types";
 import BaseFrame from "../../components/Base/Frame";
 import BaseChart from "../../components/Base/Chart";
 import BaseModal from "../../components/Base/Modal";
@@ -23,28 +24,19 @@ function SpiderDetailsPage() {
     data2: [0, 0, 0, 0, 0, 0],
   });
 
-  const [logs, setLogs] = useState([
-    {
-      id: 1,
-      date: "2023/08/06 - 15:45:27",
-      text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-    },
-    {
-      id: 2,
-      date: "2023/08/06 - 15:45:27",
-      text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-    },
-    {
-      id: 3,
-      date: "2023/08/06 - 15:45:27",
-      text: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s.",
-    },
-  ]);
+  const [logs, setLogs] = useState<ILog[]>([]);
+
+  const logTypesColor: any = {
+    INFO: "var(--color-primary)",
+    ERROR: "var(--color-error)",
+    WARNING: "var(--color-warning)",
+  };
 
   const { state } = useLocation();
 
   useEffect(() => {
     fetchChartData();
+    fetchLogsData();
   }, []);
 
   const fetchChartData = () => {
@@ -89,6 +81,47 @@ function SpiderDetailsPage() {
                   data2: newData2,
                   labels: newLabels,
                 };
+              });
+              readChunk();
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+        readChunk();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const fetchLogsData = () => {
+    fetch("http://127.0.0.1:8001/{crawler_uuid}/logs?crawler_id=1")
+      .then((response) => {
+        const stream = response.body;
+        const reader = stream!.getReader();
+        const readChunk = () => {
+          reader
+            .read()
+            .then(({ value, done }) => {
+              if (done) {
+                console.log("Stream finished");
+                return;
+              }
+              const chunkString = new TextDecoder().decode(value);
+              const resData = JSON.parse(chunkString);
+              console.log(resData);
+              let time = new Date(resData.data.timestamp).toLocaleString();
+              setLogs((prevData) => {
+                return [
+                  {
+                    id: resData.data.crawler_id,
+                    date: time,
+                    message: resData.data.message,
+                    type: resData.data.level,
+                  },
+                  ...prevData,
+                ];
               });
               readChunk();
             })
@@ -189,18 +222,22 @@ function SpiderDetailsPage() {
         </div>
         {/*---------- spider logs section ----------*/}
         <div className="main-card w-full px-10 py-7 mb-10">
-          <h3 className="text-xl font-semibold">request per second</h3>
+          <h3 className="text-xl font-semibold">Logs</h3>
           <div className="divider my-3"></div>
-          {logs.map((log, index) => (
-            <div
-              key={log.id}
-              className="spider-logs-row flex-wrap lg:flex-nowrap"
-            >
-              <h4 className="mr-5">{index + 1}</h4>
-              <h4 className="mr-16">{log.date}</h4>
-              <h5>{log.text}</h5>
-            </div>
-          ))}
+          <div className="h-[400px] overflow-y-auto">
+            {logs.map((log, index) => (
+              <div
+                key={index}
+                className="spider-logs-row flex-wrap lg:flex-nowrap"
+              >
+                <h4 className="mr-5">{index + 1}</h4>
+                <h4 className="mr-16">{log.date}</h4>
+                <h5 style={{ color: logTypesColor[log.type] }}>
+                  {log.message}
+                </h5>
+              </div>
+            ))}
+          </div>
         </div>
       </BaseFrame>
       <BaseModal isOpen={confirmDialog} setIsOpen={setConfirmDialog}>

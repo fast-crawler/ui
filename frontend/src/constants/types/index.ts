@@ -18,3 +18,10 @@ export interface IDataSet {
   label: string;
   color: string;
 }
+
+export interface ILog {
+  id: number;
+  date: string;
+  message: string;
+  type: string;
+}
