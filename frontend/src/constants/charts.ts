@@ -1,5 +1,6 @@
 export const CHART_OPTIONS: any = {
   responsive: true,
+  animation: false,
   font: {
     family: "Inter",
   },

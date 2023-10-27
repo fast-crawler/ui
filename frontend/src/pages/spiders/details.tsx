@@ -44,56 +44,64 @@ function SpiderDetailsPage() {
   const { state } = useLocation();
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newDataPoint = Math.floor(Math.random() * 100);
-      const newDataPoint1 = Math.floor(Math.random() * 100);
-      const newDataPoint2 = Math.floor(Math.random() * 100);
-      setRequest((prevData) => {
-        const newData = [...prevData.data, newDataPoint];
-        const newData1 = [...prevData.data1, newDataPoint1];
-        const newData2 = [...prevData.data2, newDataPoint2];
-        const newLabels = [...prevData.labels, new Date().toLocaleTimeString()];
-        newData.splice(0, 1);
-        newData1.splice(0, 1);
-        newData2.splice(0, 1);
-        newLabels.splice(0, 1);
-        return {
-          data: newData,
-          data1: newData1,
-          data2: newData2,
-          labels: newLabels,
-        };
-      });
-      console.log(requests);
-    }, 1000);
-
-    chatSocket.onopen = function (e: any) {
-      chatSocket?.send(
-        JSON.stringify({
-          content: "begin chat !!!!",
-          sender: navigator.userAgent,
-        })
-      );
-      console.log("success");
-    };
-
-    chatSocket.onmessage = function (e: any) {
-      const data = JSON.parse(e.data);
-      setLogs((prevLogs) => [
-        {
-          id: prevLogs.length + 1,
-          date: new Date().toLocaleString(),
-          text: `${data["sender"]} -> ${data["content"]}`,
-        },
-        ...prevLogs,
-      ]);
-    };
-
-    chatSocket.onclose = function (e: any) {
-      console.error("Chat socket closed unexpectedly");
-    };
-    return () => clearInterval(interval);
+    fetchChartData();
   }, []);
+
+  const fetchChartData = () => {
+    fetch("http://127.0.0.1:8001/{crawler_uuid}/chart?crawler_id=1")
+      .then((response) => {
+        const stream = response.body;
+        const reader = stream!.getReader();
+        const readChunk = () => {
+          reader
+            .read()
+            .then(({ value, done }) => {
+              if (done) {
+                console.log("Stream finished");
+                return;
+              }
+              const chunkString = new TextDecoder().decode(value);
+              const resData = JSON.parse(chunkString);
+              let time = resData.data.time.split("T")[1];
+              let second = Math.floor(+time.split(":")[2]);
+              time =
+                time.split(":")[0] + ":" + time.split(":")[1] + ":" + second;
+              console.log(time);
+              //@ts-ignore
+              setRequest((prevData) => {
+                const newData = [...prevData.data, resData.data.all_requests];
+                const newData1 = [
+                  ...prevData.data1,
+                  resData.data.successful_requests,
+                ];
+                const newData2 = [
+                  ...prevData.data2,
+                  resData.data.failed_requests,
+                ];
+                const newLabels = [...prevData.labels, time];
+                newData.splice(0, 1);
+                newData1.splice(0, 1);
+                newData2.splice(0, 1);
+                newLabels.splice(0, 1);
+                return {
+                  data: newData,
+                  data1: newData1,
+                  data2: newData2,
+                  labels: newLabels,
+                };
+              });
+              readChunk();
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+        readChunk();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
 
   const toggleSpiderStatus = async () => {
     await toggleTask({ name: spiderName }).then((res) => {
