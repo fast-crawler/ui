@@ -44,7 +44,7 @@ async def generate_random_chart():
         await asyncio.sleep(0.5)
 
 
-async def generate_random_crawlers_data():
+async def generate_random_crawler_data():
     all_crawlers = random.randint(0, 99)
     active_crawlers = random.randint(0, 50)
     deactive_crawlers = all_crawlers - active_crawlers
@@ -61,17 +61,36 @@ async def generate_random_crawlers_data():
         await asyncio.sleep(0.5)
 
 
+async def generate_random_crawlers_data():
+    names = ('Digikala', 'DevTo', 'Medium')
+    started_at = tuple(datetime.datetime.utcnow().isoformat() for i in range(3))
+    durations = ('12:23', '11:55', '03:19')
+    states = ['Active', 'Pause', 'Finished']
+    while True:
+        iterator = zip(names, started_at, durations, states)
+        data = {
+            'data': [{
+                'name': d1,
+                'started_at': d2,
+                'duration': d3,
+                'state': d4
+                } for d1, d2, d3, d4 in iterator]
+            }
+        yield json.dumps(data)
+        await asyncio.sleep(0.5)
+
+
 
 router = APIRouter()
 
 @router.get("/{crawler_uuid}/chart")
-async def crawler_chart(crawler_id: int):
+async def crawler_chart(crawler_uuid: str):
     return StreamingResponse(content=generate_random_chart(),
                              media_type='application/x-ndjson')
 
 
 @router.get("/{crawler_uuid}/logs")
-async def crawler_logs(crawler_id: int):
+async def crawler_logs(crawler_uuid: str):
     return StreamingResponse(content=generate_random_log(),
                              media_type='application/x-ndjson')
 
@@ -83,6 +102,11 @@ async def dashboard_chart():
 
 @router.get("/dashboard/crawlers")
 async def dashboard_crawlers():
+    return StreamingResponse(content=generate_random_crawler_data(),
+                             media_type='application/x-ndjson')
+
+@router.get("/crawler/list")
+async def crawler_list():
     return StreamingResponse(content=generate_random_crawlers_data(),
                              media_type='application/x-ndjson')
 
