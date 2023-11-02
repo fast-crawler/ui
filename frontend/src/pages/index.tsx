@@ -5,8 +5,12 @@ import BaseChart from "../components/Base/Chart";
 import { IOverviewData } from "../constants/types";
 
 function index() {
-  const requestsLabels = ["1", "2", "3", "4", "5", "6"];
-  const [requests] = useState([20, 16, 5, 38, 30, 22]);
+  const [requests, setRequest] = useState({
+    labels: ["", "", "", "", "", ""],
+    data: [0, 0, 0, 0, 0, 0],
+    data1: [0, 0, 0, 0, 0, 0],
+    data2: [0, 0, 0, 0, 0, 0],
+  });
 
   const [overviewData, setOverviewData] = useState<IOverviewData>({
     currentTime: "",
@@ -20,6 +24,7 @@ function index() {
 
   useEffect(() => {
     fetchOverviewData();
+    fetchChartData();
   }, []);
 
   const fetchOverviewData = () => {
@@ -44,6 +49,67 @@ function index() {
                 allCrawlers: resData.data.all_crawlers,
                 activeCrawlers: resData.data.active_crawlers,
                 deactiveCrawlers: resData.data.deactive_crawlers,
+              }));
+              readChunk();
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+        readChunk();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const fetchChartData = () => {
+    fetch("http://127.0.0.1:8001/dashboard/chart")
+      .then((response) => {
+        const stream = response.body;
+        const reader = stream!.getReader();
+        const readChunk = () => {
+          reader
+            .read()
+            .then(({ value, done }) => {
+              if (done) {
+                console.log("Stream finished");
+                return;
+              }
+              const chunkString = new TextDecoder().decode(value);
+              const resData = JSON.parse(chunkString);
+              let time = resData.data.time.split("T")[1];
+              let second = Math.floor(+time.split(":")[2]);
+              time =
+                time.split(":")[0] + ":" + time.split(":")[1] + ":" + second;
+              //@ts-ignore
+              setRequest((prevData) => {
+                const newData = [...prevData.data, resData.data.all_requests];
+                const newData1 = [
+                  ...prevData.data1,
+                  resData.data.successful_requests,
+                ];
+                const newData2 = [
+                  ...prevData.data2,
+                  resData.data.failed_requests,
+                ];
+                const newLabels = [...prevData.labels, time];
+                newData.splice(0, 1);
+                newData1.splice(0, 1);
+                newData2.splice(0, 1);
+                newLabels.splice(0, 1);
+                return {
+                  data: newData,
+                  data1: newData1,
+                  data2: newData2,
+                  labels: newLabels,
+                };
+              });
+              setOverviewData((prevData) => ({
+                ...prevData,
+                totalRequests: resData.data.all_requests,
+                successfullRequests: resData.data.successful_requests,
+                failedRequests: resData.data.failed_requests,
               }));
               readChunk();
             })
@@ -101,9 +167,15 @@ function index() {
             <div className="divider my-3"></div>
             <BaseChart
               datasets={[
-                { data: requests, label: "requests", color: "#1b59f8" },
+                { color: "#1b59f8", label: "total", data: requests.data },
+                { color: "#b91c1c", label: "failed", data: requests.data1 },
+                {
+                  color: "#059669",
+                  label: "successfull",
+                  data: requests.data2,
+                },
               ]}
-              labels={requestsLabels}
+              labels={requests.labels}
             />
           </div>
         </div>
