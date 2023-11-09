@@ -3,7 +3,7 @@ import { Icon } from "@mdi/react";
 import { mdiMagnify } from "@mdi/js";
 
 import { useSpiderApi } from "../../api";
-import { ISpider } from "../../constants/types";
+import { ISpiderData } from "../../constants/types";
 import BaseFrame from "../../components/Base/Frame";
 import SpidersFilter from "../../components/Spiders/FIlter";
 import SpidersDataTable from "../../components/Spiders/DataTable";
@@ -19,11 +19,43 @@ function spiders() {
   };
 
   useEffect(() => {
-    getSpidersData();
+    fetchOverviewData();
+    // getSpidersData();
   }, []);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [spiders, setSpiders] = useState<ISpider[]>([]);
+  const [spiders, setSpiders] = useState<ISpiderData[]>([]);
+  const fetchOverviewData = () => {
+    fetch("http://127.0.0.1:8001/crawler/list")
+      .then((response) => {
+        const stream = response.body;
+        const reader = stream!.getReader();
+        const readChunk = () => {
+          reader
+            .read()
+            .then(({ value, done }) => {
+              if (done) {
+                console.log("Stream finished");
+                return;
+              }
+              const chunkString = new TextDecoder().decode(value);
+              const resData = JSON.parse(chunkString);
+              // let time = new Date(resData.data.time).toLocaleString();
+              // console.log(resData);
+              setSpiders(resData.data);
+              readChunk();
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+        readChunk();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   const getSpidersData = async () => {
     setLoading(true);
     await getSpiders()

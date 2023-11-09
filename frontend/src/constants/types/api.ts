@@ -11,3 +11,10 @@ export interface ISpider {
   start_cond: string | boolean;
   end_cond: string | boolean;
 }
+
+export interface ISpiderData {
+  duration: string;
+  name: string;
+  started_at: string;
+  state: string;
+}

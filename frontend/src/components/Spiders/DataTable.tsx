@@ -3,24 +3,24 @@ import Icon from "@mdi/react";
 import { useNavigate } from "react-router-dom";
 import { mdiRefresh } from "@mdi/js";
 
-import { ISpider } from "../../constants/types";
+import { ISpiderData } from "../../constants/types";
 
 export interface SpidersDataTableProps {
-  data: ISpider[];
+  data: ISpiderData[];
   loading: boolean;
 }
 
 function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
   const statusColor: any = {
-    success: {
+    Active: {
       text: "success",
       back: "bg-success",
     },
-    finished: {
+    Finished: {
       text: "error",
       back: "bg-error",
     },
-    paused: {
+    Pause: {
       text: "warning",
       back: "bg-warning",
     },
@@ -55,8 +55,8 @@ function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
                   <input type="checkbox" className="h-4 w-4 accent-primary" />
                 </th>
                 <th className="pe-4">#</th>
-                <th className="w-4/12">Name</th>
-                <th className="w-2/12">Started at</th>
+                <th className="w-3/12">Name</th>
+                <th className="w-3/12">Started at</th>
                 <th className="w-2/12">Duration</th>
                 <th className="w-2/12">State</th>
               </tr>
@@ -81,21 +81,19 @@ function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
                   </td>
                   <td>{index + 1}</td>
                   <td className="pe-4">{spider.name}</td>
-                  <td>{spider.start_cond}</td>
-                  <td>{spider.timeout}</td>
+                  <td>{new Date(spider.started_at).toLocaleString()}</td>
+                  <td>{spider.duration}</td>
                   <td>
                     <span
                       className={`badge`}
                       style={{
-                        color: `var(--color-${
-                          statusColor[spider.status].text
-                        })`,
+                        color: `var(--color-${statusColor[spider.state].text})`,
                         background: `var(--color-${
-                          statusColor[spider.status].back
+                          statusColor[spider.state].back
                         })`,
                       }}
                     >
-                      {spider.status}
+                      {spider.state}
                     </span>
                   </td>
                 </tr>
