@@ -8,9 +8,16 @@ import { ISpiderData } from "../../constants/types";
 export interface SpidersDataTableProps {
   data: ISpiderData[];
   loading: boolean;
+  selectedIds: string[];
+  onSelectedIdsChange: (newValue: any) => void;
 }
 
-function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
+function SpidersDataTable({
+  data,
+  loading,
+  selectedIds,
+  onSelectedIdsChange,
+}: SpidersDataTableProps) {
   const statusColor: any = {
     Active: {
       text: "success",
@@ -28,8 +35,18 @@ function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
 
   const navigate = useNavigate();
 
-  const handleCheckboxClick = (event: React.MouseEvent<HTMLInputElement>) => {
+  const handleCheckboxClick = (
+    event: React.MouseEvent<HTMLInputElement>,
+    id: string
+  ) => {
     event.stopPropagation();
+    onSelectedIdsChange((prevSelectedIds: any) => {
+      const selectedData = [...prevSelectedIds];
+      const index = selectedData.indexOf(id);
+      if (index !== -1) selectedData.splice(index, 1);
+      else selectedData.push(id);
+      return [...selectedData];
+    });
   };
 
   return (
@@ -76,7 +93,9 @@ function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
                     <input
                       type="checkbox"
                       className="h-4 w-4 accent-primary"
-                      onClick={handleCheckboxClick}
+                      onClick={(event) =>
+                        handleCheckboxClick(event, spider.name)
+                      }
                     />
                   </td>
                   <td>{index + 1}</td>

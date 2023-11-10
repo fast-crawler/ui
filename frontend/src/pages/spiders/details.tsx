@@ -9,8 +9,6 @@ import BaseFrame from "../../components/Base/Frame";
 import BaseChart from "../../components/Base/Chart";
 import BaseModal from "../../components/Base/Modal";
 
-let chatSocket: WebSocket = new WebSocket("ws://127.0.0.1:8001/ws");
-
 function SpiderDetailsPage() {
   const { toggleTask } = useSpiderApi();
   const { state } = useLocation();

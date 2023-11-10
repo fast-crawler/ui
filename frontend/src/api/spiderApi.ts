@@ -17,8 +17,17 @@ export function useSpiderApi() {
     });
   };
 
+  const toggleTasks = async (data: any, isStart: boolean = false) => {
+    return await request({
+      url: isStart ? "/start_tasks" : "/stop_tasks",
+      method: "post",
+      data,
+    });
+  };
+
   return {
     getSpiders,
     toggleTask,
+    toggleTasks,
   };
 }
