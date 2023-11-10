@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Icon from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 
 import { useSpiderApi } from "../../api";
-import { ILog } from "../../constants/types";
+import { ILog, ISpiderDetails } from "../../constants/types";
 import BaseFrame from "../../components/Base/Frame";
 import BaseChart from "../../components/Base/Chart";
 import BaseModal from "../../components/Base/Modal";
@@ -12,9 +12,10 @@ import BaseModal from "../../components/Base/Modal";
 let chatSocket: WebSocket = new WebSocket("ws://127.0.0.1:8001/ws");
 
 function SpiderDetailsPage() {
-  const { spiderName } = useParams();
   const { toggleTask } = useSpiderApi();
+  const { state } = useLocation();
 
+  const [isStopButton, setIsStopButton] = useState<boolean>(false);
   const [confirmDialog, setConfirmDialog] = useState<boolean>(false);
 
   const [requests, setRequest] = useState({
@@ -24,6 +25,32 @@ function SpiderDetailsPage() {
     data2: [0, 0, 0, 0, 0, 0],
   });
 
+  const [spiderDetails, setSpiderDetails] = useState<ISpiderDetails>({
+    id: "",
+    name: "",
+    duration: "",
+    started_at: "",
+    failedRequest: 0,
+    succesfullRequest: 0,
+    totalRequest: 0,
+    state: "Active",
+  });
+
+  const statusColor: any = {
+    Active: {
+      text: "success",
+      back: "bg-success",
+    },
+    Finished: {
+      text: "error",
+      back: "bg-error",
+    },
+    Pause: {
+      text: "warning",
+      back: "bg-warning",
+    },
+  };
+
   const [logs, setLogs] = useState<ILog[]>([]);
 
   const logTypesColor: any = {
@@ -32,9 +59,8 @@ function SpiderDetailsPage() {
     WARNING: "var(--color-warning)",
   };
 
-  const { state } = useLocation();
-
   useEffect(() => {
+    fetchCrawlerDetails();
     fetchChartData();
     fetchLogsData();
   }, []);
@@ -81,6 +107,52 @@ function SpiderDetailsPage() {
                   labels: newLabels,
                 };
               });
+              setSpiderDetails((prevData) => ({
+                ...prevData,
+                totalRequest: resData.data.all_requests,
+                succesfullRequest: resData.data.successful_requests,
+                failedRequest: resData.data.failed_requests,
+              }));
+              readChunk();
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        };
+        readChunk();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const fetchCrawlerDetails = () => {
+    fetch(`http://127.0.0.1:8001/${state.data.id}/detail`)
+      .then((response) => {
+        const stream = response.body;
+        const reader = stream!.getReader();
+        const readChunk = () => {
+          reader
+            .read()
+            .then(({ value, done }) => {
+              if (done) {
+                console.log("Stream finished");
+                return;
+              }
+              const chunkString = new TextDecoder().decode(value);
+              try {
+                const resData = JSON.parse(chunkString);
+                let time = new Date(
+                  resData.data[0].started_at
+                ).toLocaleString();
+                setSpiderDetails((prevData) => ({
+                  ...prevData,
+                  ...resData.data[0],
+                  started_at: time,
+                }));
+                if (resData.data[0].state === "Active") setIsStopButton(true);
+                else setIsStopButton(false);
+              } catch (error) {}
               readChunk();
             })
             .catch((error) => {
@@ -108,19 +180,22 @@ function SpiderDetailsPage() {
                 return;
               }
               const chunkString = new TextDecoder().decode(value);
-              const resData = JSON.parse(chunkString);
-              let time = new Date(resData.data.timestamp).toLocaleString();
-              setLogs((prevData) => {
-                return [
-                  {
-                    id: resData.data.crawler_id,
-                    date: time,
-                    message: resData.data.message,
-                    type: resData.data.level,
-                  },
-                  ...prevData,
-                ];
-              });
+              try {
+                const resData = JSON.parse(chunkString);
+                let time = new Date(resData.data.timestamp).toLocaleString();
+                setLogs((prevData) => {
+                  return [
+                    {
+                      id: resData.data.crawler_id,
+                      date: time,
+                      message: resData.data.message,
+                      type: resData.data.level,
+                    },
+                    ...prevData,
+                  ];
+                });
+              } catch (error) {}
+
               readChunk();
             })
             .catch((error) => {
@@ -137,17 +212,8 @@ function SpiderDetailsPage() {
   const toggleSpiderStatus = async () => {
     await toggleTask({ name: state.data.name }).then((res) => {
       setConfirmDialog(false);
-      state.data.disabled = !state.data.disabled;
+      setIsStopButton(!isStopButton);
     });
-    document.getElementById("confirm-button")!.onclick = function (e) {
-      const message = state.data.disabled ? "spider started" : "spider stopped";
-      chatSocket?.send(
-        JSON.stringify({
-          content: message,
-          sender: navigator.userAgent,
-        })
-      );
-    };
   };
 
   return (
@@ -158,7 +224,7 @@ function SpiderDetailsPage() {
           <div className="main-card w-full xl:w-2/5 px-10 py-7">
             <div className="flex justify-between items-center">
               <h3 className="text-xl font-semibold">Spider details</h3>
-              {state.data.disabled ? (
+              {!isStopButton ? (
                 <button
                   className="btn-primary text-white bg-success py-1"
                   onClick={() => setConfirmDialog(true)}
@@ -178,29 +244,39 @@ function SpiderDetailsPage() {
             <div className="flex flex-col xl:justify-around h-4/5">
               <div className="spider-details-row">
                 <h4>State : </h4>
-                <span className="spider-details-row__status">
-                  {state.data.status}
+                <span
+                  className="spider-details-row__status"
+                  style={{
+                    color: `var(--color-${
+                      statusColor[spiderDetails.state].text
+                    })`,
+                    background: `var(--color-${
+                      statusColor[spiderDetails.state].back
+                    })`,
+                  }}
+                >
+                  {spiderDetails.state}
                 </span>
               </div>
               <div className="spider-details-row">
                 <h4>Started at : </h4>
-                <h5>2023/08/06 - 15:45:27</h5>
+                <h5>{spiderDetails.started_at}</h5>
               </div>
               <div className="spider-details-row">
                 <h4>Duration : </h4>
-                <h5>16 h 32 m</h5>
+                <h5>{spiderDetails.duration}</h5>
               </div>
               <div className="spider-details-row">
                 <h4>Successfull requests : </h4>
-                <h5>235,365</h5>
+                <h5>{spiderDetails.succesfullRequest}</h5>
               </div>
               <div className="spider-details-row">
                 <h4>Failed requests : </h4>
-                <h5>21,000</h5>
+                <h5>{spiderDetails.failedRequest}</h5>
               </div>
               <div className="spider-details-row mb-0">
                 <h4>Total requests :</h4>
-                <h5>256,365</h5>
+                <h5>{spiderDetails.totalRequest}</h5>
               </div>
             </div>
           </div>

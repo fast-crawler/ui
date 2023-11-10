@@ -19,3 +19,9 @@ export interface ISpiderData {
   started_at: string;
   state: string;
 }
+
+export interface ISpiderDetails extends ISpiderData {
+  totalRequest: number;
+  succesfullRequest: number;
+  failedRequest: number;
+}
