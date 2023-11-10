@@ -208,7 +208,7 @@ function SpiderDetailsPage() {
   };
 
   const toggleSpiderStatus = async () => {
-    await toggleTask({ name: state.data.name }).then((res) => {
+    await toggleTask({ name: state.data.name }).then(() => {
       setConfirmDialog(false);
       setIsStopButton(!isStopButton);
     });

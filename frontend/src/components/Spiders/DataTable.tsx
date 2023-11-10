@@ -15,7 +15,6 @@ export interface SpidersDataTableProps {
 function SpidersDataTable({
   data,
   loading,
-  selectedIds,
   onSelectedIdsChange,
 }: SpidersDataTableProps) {
   const statusColor: any = {

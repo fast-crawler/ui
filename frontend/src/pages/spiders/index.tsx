@@ -32,7 +32,7 @@ function spiders() {
     // getSpidersData();
   }, []);
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading] = useState<boolean>(false);
   const [spiders, setSpiders] = useState<ISpiderData[]>([]);
   const fetchOverviewData = async () => {
     try {
@@ -73,7 +73,7 @@ function spiders() {
   };
 
   const toggleSpidersStatus = async () => {
-    await toggleTasks({ names: selectedIds }, isStart).then((res) => {
+    await toggleTasks({ names: selectedIds }, isStart).then(() => {
       setConfirmDialog(false);
     });
   };
