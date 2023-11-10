@@ -41,15 +41,20 @@ function index() {
                 return;
               }
               const chunkString = new TextDecoder().decode(value);
-              const resData = JSON.parse(chunkString);
-              let time = new Date(resData.data.time).toLocaleString();
-              setOverviewData((prevData) => ({
-                ...prevData,
-                currentTime: time,
-                allCrawlers: resData.data.all_crawlers,
-                activeCrawlers: resData.data.active_crawlers,
-                deactiveCrawlers: resData.data.deactive_crawlers,
-              }));
+              try {
+                const resData = JSON.parse(chunkString);
+                let time = new Date(resData.data.time).toLocaleString();
+                setOverviewData((prevData) => ({
+                  ...prevData,
+                  currentTime: time,
+                  allCrawlers: resData.data.all_crawlers,
+                  activeCrawlers: resData.data.active_crawlers,
+                  deactiveCrawlers: resData.data.deactive_crawlers,
+                }));
+              } catch (error) {
+                console.log(error);
+              }
+
               readChunk();
             })
             .catch((error) => {
@@ -77,40 +82,45 @@ function index() {
                 return;
               }
               const chunkString = new TextDecoder().decode(value);
-              const resData = JSON.parse(chunkString);
-              let time = resData.data.time.split("T")[1];
-              let second = Math.floor(+time.split(":")[2]);
-              time =
-                time.split(":")[0] + ":" + time.split(":")[1] + ":" + second;
-              //@ts-ignore
-              setRequest((prevData) => {
-                const newData = [...prevData.data, resData.data.all_requests];
-                const newData1 = [
-                  ...prevData.data1,
-                  resData.data.successful_requests,
-                ];
-                const newData2 = [
-                  ...prevData.data2,
-                  resData.data.failed_requests,
-                ];
-                const newLabels = [...prevData.labels, time];
-                newData.splice(0, 1);
-                newData1.splice(0, 1);
-                newData2.splice(0, 1);
-                newLabels.splice(0, 1);
-                return {
-                  data: newData,
-                  data1: newData1,
-                  data2: newData2,
-                  labels: newLabels,
-                };
-              });
-              setOverviewData((prevData) => ({
-                ...prevData,
-                totalRequests: resData.data.all_requests,
-                successfullRequests: resData.data.successful_requests,
-                failedRequests: resData.data.failed_requests,
-              }));
+              try {
+                const resData = JSON.parse(chunkString);
+                let time = resData.data.time.split("T")[1];
+                let second = Math.floor(+time.split(":")[2]);
+                time =
+                  time.split(":")[0] + ":" + time.split(":")[1] + ":" + second;
+                //@ts-ignore
+                setRequest((prevData) => {
+                  const newData = [...prevData.data, resData.data.all_requests];
+                  const newData1 = [
+                    ...prevData.data1,
+                    resData.data.successful_requests,
+                  ];
+                  const newData2 = [
+                    ...prevData.data2,
+                    resData.data.failed_requests,
+                  ];
+                  const newLabels = [...prevData.labels, time];
+                  newData.splice(0, 1);
+                  newData1.splice(0, 1);
+                  newData2.splice(0, 1);
+                  newLabels.splice(0, 1);
+                  return {
+                    data: newData,
+                    data1: newData1,
+                    data2: newData2,
+                    labels: newLabels,
+                  };
+                });
+                setOverviewData((prevData) => ({
+                  ...prevData,
+                  totalRequests: resData.data.all_requests,
+                  successfullRequests: resData.data.successful_requests,
+                  failedRequests: resData.data.failed_requests,
+                }));
+              } catch (error) {
+                console.log(error);
+              }
+
               readChunk();
             })
             .catch((error) => {

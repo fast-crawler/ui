@@ -13,6 +13,7 @@ export interface ISpider {
 }
 
 export interface ISpiderData {
+  id: string;
   duration: string;
   name: string;
   started_at: string;

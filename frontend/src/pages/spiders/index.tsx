@@ -25,35 +25,42 @@ function spiders() {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [spiders, setSpiders] = useState<ISpiderData[]>([]);
-  const fetchOverviewData = () => {
-    fetch("http://127.0.0.1:8001/crawler/list")
-      .then((response) => {
-        const stream = response.body;
-        const reader = stream!.getReader();
-        const readChunk = () => {
-          reader
-            .read()
-            .then(({ value, done }) => {
-              if (done) {
-                console.log("Stream finished");
-                return;
-              }
-              const chunkString = new TextDecoder().decode(value);
-              const resData = JSON.parse(chunkString);
-              // let time = new Date(resData.data.time).toLocaleString();
-              // console.log(resData);
-              setSpiders(resData.data);
-              readChunk();
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        };
-        readChunk();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  const fetchOverviewData = async () => {
+    try {
+      await fetch("http://127.0.0.1:8001/crawler/list")
+        .then((response) => {
+          const stream = response.body;
+          const reader = stream!.getReader();
+          const readChunk = () => {
+            reader
+              .read()
+              .then(({ value, done }) => {
+                if (done) {
+                  console.log("Stream finished");
+                  return;
+                }
+                const chunkString = new TextDecoder().decode(value);
+                try {
+                  const resData = JSON.parse(chunkString);
+                  // let time = new Date(resData.data.time).toLocaleString();
+                  console.log(resData);
+                  setSpiders(resData.data);
+                } catch (error) {
+                  console.log(error);
+                }
+
+                readChunk();
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+          };
+          readChunk();
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    } catch (error) {}
   };
 
   const getSpidersData = async () => {

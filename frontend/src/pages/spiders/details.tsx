@@ -40,7 +40,7 @@ function SpiderDetailsPage() {
   }, []);
 
   const fetchChartData = () => {
-    fetch("http://127.0.0.1:8001/{crawler_uuid}/chart?crawler_id=1")
+    fetch(`http://127.0.0.1:8001/${state.data.id}/chart`)
       .then((response) => {
         const stream = response.body;
         const reader = stream!.getReader();
@@ -58,7 +58,6 @@ function SpiderDetailsPage() {
               let second = Math.floor(+time.split(":")[2]);
               time =
                 time.split(":")[0] + ":" + time.split(":")[1] + ":" + second;
-              console.log(time);
               //@ts-ignore
               setRequest((prevData) => {
                 const newData = [...prevData.data, resData.data.all_requests];
@@ -96,7 +95,7 @@ function SpiderDetailsPage() {
   };
 
   const fetchLogsData = () => {
-    fetch("http://127.0.0.1:8001/{crawler_uuid}/logs?crawler_id=1")
+    fetch(`http://127.0.0.1:8001/${state.data.id}/logs`)
       .then((response) => {
         const stream = response.body;
         const reader = stream!.getReader();
@@ -110,7 +109,6 @@ function SpiderDetailsPage() {
               }
               const chunkString = new TextDecoder().decode(value);
               const resData = JSON.parse(chunkString);
-              console.log(resData);
               let time = new Date(resData.data.timestamp).toLocaleString();
               setLogs((prevData) => {
                 return [
@@ -137,7 +135,7 @@ function SpiderDetailsPage() {
   };
 
   const toggleSpiderStatus = async () => {
-    await toggleTask({ name: spiderName }).then((res) => {
+    await toggleTask({ name: state.data.name }).then((res) => {
       setConfirmDialog(false);
       state.data.disabled = !state.data.disabled;
     });
@@ -154,7 +152,7 @@ function SpiderDetailsPage() {
 
   return (
     <div id="spiderDetails">
-      <BaseFrame title={spiderName!} isBack>
+      <BaseFrame title={state.data.name} isBack>
         <div className="flex flex-col xl:flex-row gap-8 w-full mb-8">
           {/*---------- spider details section ----------*/}
           <div className="main-card w-full xl:w-2/5 px-10 py-7">

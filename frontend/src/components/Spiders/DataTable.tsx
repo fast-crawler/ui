@@ -67,7 +67,7 @@ function SpidersDataTable({ data, loading }: SpidersDataTableProps) {
                   key={spider.name}
                   className="hover:bg-bg-primary"
                   onClick={() =>
-                    navigate(`/spiders/${spider.name}`, {
+                    navigate(`/spiders/${spider.id}`, {
                       state: { data: spider },
                     })
                   }
