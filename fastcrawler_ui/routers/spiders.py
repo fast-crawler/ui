@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Type
+from typing import Any, Literal, Type
 
 from fastapi import APIRouter, Body, Depends, status
 from fastcrawler import FastCrawler
@@ -59,8 +59,8 @@ def manage_tasks(
     crawler: FastCrawler,
     spider_repository: SpiderRepository,
     spider_controller: Type[SpiderController],
-    action: str,
-):
+    action: Literal["start", "stop"],
+) -> asyncio.Future[list[None]]:
     controller = spider_controller(spider_repository)
     action_call = getattr(controller, f"{action}_task_by_name")
 
