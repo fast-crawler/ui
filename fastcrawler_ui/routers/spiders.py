@@ -1,5 +1,5 @@
 import asyncio
-from typing import Any, Literal, Type
+from typing import Any, Coroutine, Literal, Type
 
 from fastapi import APIRouter, Body, Depends, status
 from fastcrawler import FastCrawler
@@ -60,13 +60,29 @@ def manage_tasks(
     spider_repository: SpiderRepository,
     spider_controller: Type[SpiderController],
     action: Literal["start", "stop"],
-) -> asyncio.Future[list[None]]:
+) -> list[Coroutine[Any, Any, None]]:
+    """
+    Manages tasks by performing the specified action on each task.
+
+    This function creates a list of coroutines by calling the specified action
+    (either 'start' or 'stop') on each task in the provided list of task names.
+
+    Parameters:
+    task_names (TasksInput): A list of task names to be managed.
+    crawler (FastCrawler): An instance of the FastCrawler class.
+    spider_repository (SpiderRepository): An instance of the SpiderRepository class.
+    spider_controller (Type[SpiderController]): The class of the SpiderController.
+    action (Literal["start", "stop"]): The action to be performed on each task.
+
+    Returns:
+    list[Coroutine[Any, Any, None]]: A list of coroutines representing the tasks with the specified action called on them.
+    """
     controller = spider_controller(spider_repository)
     action_call = getattr(controller, f"{action}_task_by_name")
 
     tasks = [action_call(crawler, task_name) for task_name in task_names.names]
 
-    return asyncio.gather(*tasks)
+    return tasks
 
 
 @spider_router.post("/start_tasks", status_code=status.HTTP_204_NO_CONTENT)
@@ -79,7 +95,15 @@ async def start_tasks(
     """
     The /start_tasks endpoint is used to start a crawler task.
     """
-    await manage_tasks(task_names, crawler, spider_repository, spider_controller, action="start")
+    await asyncio.gather(
+        *manage_tasks(
+            task_names,
+            crawler,
+            spider_repository,
+            spider_controller,
+            action="start",
+        )
+    )
 
 
 @spider_router.post("/stop_tasks", status_code=status.HTTP_204_NO_CONTENT)
@@ -92,7 +116,15 @@ async def stop_tasks(
     """
     The /stop_tasks endpoint is used to stop a crawler task.
     """
-    await manage_tasks(task_names, crawler, spider_repository, spider_controller, action="stop")
+    await asyncio.gather(
+        *manage_tasks(
+            task_names,
+            crawler,
+            spider_repository,
+            spider_controller,
+            action="stop",
+        )
+    )
 
 
 @spider_router.post("/toggle_task", status_code=status.HTTP_204_NO_CONTENT)
