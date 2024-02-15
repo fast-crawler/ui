@@ -1,0 +1,37 @@
+import { ReactNode } from "react";
+
+export * from "./api";
+
+export interface Router {
+  path?: string;
+  name?: string;
+  icon?: ReactNode;
+  isShowSideBar?: boolean;
+  hasChild?: boolean;
+  isOpenDropDown?: boolean;
+  element?: ReactNode;
+  children?: Router[];
+}
+
+export interface IDataSet {
+  data: string[] | number[];
+  label: string;
+  color: string;
+}
+
+export interface ILog {
+  id: number;
+  date: string;
+  message: string;
+  type: string;
+}
+
+export interface IOverviewData {
+  currentTime: string;
+  allCrawlers: number;
+  activeCrawlers: number;
+  deactiveCrawlers: number;
+  totalRequests: number;
+  successfullRequests: number;
+  failedRequests: number;
+}
