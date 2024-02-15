@@ -1,0 +1,1 @@
+export { useSpiderApi } from "./spiderApi";

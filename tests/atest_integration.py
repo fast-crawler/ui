@@ -1,6 +1,8 @@
 import sys
+from pathlib import Path
 
-sys.path.append("../")
+sys.path.append(str(Path(__file__).parent.parent.absolute()))
+
 
 from fastcrawler import BaseModel, Depends, FastCrawler, Process, Spider, XPATHField
 
