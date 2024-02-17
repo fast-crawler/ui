@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Icon from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 
@@ -57,14 +57,23 @@ function SpiderDetailsPage() {
     WARNING: "var(--color-warning)",
   };
 
+  const navigate = useNavigate();
+  const abortController = new AbortController();
+
   useEffect(() => {
     fetchCrawlerDetails();
     fetchChartData();
     fetchLogsData();
-  }, []);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [navigate]);
 
   const fetchChartData = () => {
-    fetch(`http://127.0.0.1:8001/${state.data.id}/chart`)
+    fetch(`http://127.0.0.1:8001/${state.data.id}/chart`, {
+      signal: abortController.signal,
+    })
       .then((response) => {
         const stream = response.body;
         const reader = stream!.getReader();
@@ -120,12 +129,14 @@ function SpiderDetailsPage() {
         readChunk();
       })
       .catch((error) => {
-        console.error(error);
+        console.warn(error);
       });
   };
 
   const fetchCrawlerDetails = () => {
-    fetch(`http://127.0.0.1:8001/${state.data.id}/detail`)
+    fetch(`http://127.0.0.1:8001/${state.data.id}/detail`, {
+      signal: abortController.signal,
+    })
       .then((response) => {
         const stream = response.body;
         const reader = stream!.getReader();
@@ -160,12 +171,14 @@ function SpiderDetailsPage() {
         readChunk();
       })
       .catch((error) => {
-        console.error(error);
+        console.warn(error);
       });
   };
 
   const fetchLogsData = () => {
-    fetch(`http://127.0.0.1:8001/${state.data.id}/logs`)
+    fetch(`http://127.0.0.1:8001/${state.data.id}/logs`, {
+      signal: abortController.signal,
+    })
       .then((response) => {
         const stream = response.body;
         const reader = stream!.getReader();
@@ -203,7 +216,7 @@ function SpiderDetailsPage() {
         readChunk();
       })
       .catch((error) => {
-        console.error(error);
+        console.warn(error);
       });
   };
 

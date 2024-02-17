@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Icon } from "@mdi/react";
 import { mdiMagnify, mdiInformationOutline } from "@mdi/js";
+import { useNavigate } from "react-router-dom";
 
 import { ISpiderData } from "../../constants/types";
 import { useSpiderApi } from "../../api";
@@ -10,6 +11,8 @@ import SpidersDataTable from "../../components/Spiders/DataTable";
 import BaseModal from "../../components/Base/Modal";
 
 function spiders() {
+  const navigate = useNavigate();
+
   const [selectedSort, setSelectedSort] = useState<number>(1);
   const [selectedState, setSelectedState] = useState<number>(1);
   const [searchName, setSearchName] = useState<string>("");
@@ -28,49 +31,39 @@ function spiders() {
   };
 
   useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    const fetchOverviewData = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8001/crawler/list", {
+          signal,
+        });
+        const reader = response.body!.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("Stream finished");
+            break;
+          }
+          const chunkString = new TextDecoder().decode(value);
+          const resData = JSON.parse(chunkString);
+          setSpiders(resData.data);
+        }
+      } catch (error) {
+        console.warn("Warning in fetching data:", error);
+      }
+    };
+
     fetchOverviewData();
-    // getSpidersData();
-  }, []);
+
+    return () => {
+      abortController.abort();
+    };
+  }, [navigate]);
 
   const [loading] = useState<boolean>(false);
   const [spiders, setSpiders] = useState<ISpiderData[]>([]);
-  const fetchOverviewData = async () => {
-    try {
-      await fetch("http://127.0.0.1:8001/crawler/list")
-        .then((response) => {
-          const stream = response.body;
-          const reader = stream!.getReader();
-          const readChunk = () => {
-            reader
-              .read()
-              .then(({ value, done }) => {
-                if (done) {
-                  console.log("Stream finished");
-                  return;
-                }
-                const chunkString = new TextDecoder().decode(value);
-                try {
-                  const resData = JSON.parse(chunkString);
-                  // let time = new Date(resData.data.time).toLocaleString();
-                  // console.log(resData);
-                  setSpiders(resData.data);
-                } catch (error) {
-                  console.log(error);
-                }
-
-                readChunk();
-              })
-              .catch((error) => {
-                console.error(error);
-              });
-          };
-          readChunk();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-    } catch (error) {}
-  };
 
   const toggleSpidersStatus = async () => {
     await toggleTasks({ names: selectedIds }, isStart).then(() => {
