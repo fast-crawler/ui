@@ -7,9 +7,11 @@ sys.path.append(str(Path(__file__).parent.parent.absolute()))
 
 from fastcrawler import FastCrawler
 
-from fastcrawler_ui.core.fastapi.app import app
+from fastcrawler_ui.core.fastapi.app import create_app
 from fastcrawler_ui.core.fastapi.server import UvicornConfig, UvicornServer
 from fastcrawler_ui.core.fastapi.sync import sync_crawler_to_fastapi
+
+app = create_app()
 
 
 async def run_async(
