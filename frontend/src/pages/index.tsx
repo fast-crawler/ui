@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import BaseFrame from "../components/Base/Frame";
 import BaseChart from "../components/Base/Chart";
 import { IOverviewData } from "../constants/types";
 
 function index() {
-  const [requests, setRequest] = useState({
+  const [requests, setRequests] = useState({
     labels: ["", "", "", "", "", ""],
     data: [0, 0, 0, 0, 0, 0],
     data1: [0, 0, 0, 0, 0, 0],
@@ -22,117 +23,98 @@ function index() {
     failedRequests: 0,
   });
 
+  const navigate = useNavigate();
+
   useEffect(() => {
+    const abortController = new AbortController();
+    const signal = abortController.signal;
+
+    const fetchOverviewData = async () => {
+      try {
+        const response = await fetch(
+          "http://127.0.0.1:8001/dashboard/crawlers",
+          { signal }
+        );
+        const reader = response.body!.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("Stream finished");
+            break;
+          }
+          const chunkString = new TextDecoder().decode(value);
+          const resData = JSON.parse(chunkString);
+          const time = new Date(resData.data.time).toLocaleString();
+          setOverviewData((prevData) => ({
+            ...prevData,
+            currentTime: time,
+            allCrawlers: resData.data.all_crawlers,
+            activeCrawlers: resData.data.active_crawlers,
+            deactiveCrawlers: resData.data.deactive_crawlers,
+          }));
+        }
+      } catch (error) {
+        console.warn("Warning in fetching overview data:", error);
+      }
+    };
+
+    const fetchChartData = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8001/dashboard/chart", {
+          signal,
+        });
+        const reader = response.body!.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            console.log("Stream finished");
+            break;
+          }
+          const chunkString = new TextDecoder().decode(value);
+          const resData = JSON.parse(chunkString);
+          let time = resData.data.time.split("T")[1];
+          let second = Math.floor(+time.split(":")[2]);
+          time = time.split(":")[0] + ":" + time.split(":")[1] + ":" + second;
+
+          setRequests((prevData) => {
+            const newData = [...prevData.data, resData.data.all_requests];
+            const newData1 = [
+              ...prevData.data1,
+              resData.data.successful_requests,
+            ];
+            const newData2 = [...prevData.data2, resData.data.failed_requests];
+            const newLabels = [...prevData.labels, time];
+            newData.splice(0, 1);
+            newData1.splice(0, 1);
+            newData2.splice(0, 1);
+            newLabels.splice(0, 1);
+            return {
+              data: newData,
+              data1: newData1,
+              data2: newData2,
+              labels: newLabels,
+            };
+          });
+
+          setOverviewData((prevData) => ({
+            ...prevData,
+            totalRequests: resData.data.all_requests,
+            successfulRequests: resData.data.successful_requests,
+            failedRequests: resData.data.failed_requests,
+          }));
+        }
+      } catch (error) {
+        console.warn("Warning in fetching chart data:", error);
+      }
+    };
+
     fetchOverviewData();
     fetchChartData();
-  }, []);
 
-  const fetchOverviewData = () => {
-    fetch("http://127.0.0.1:8001/dashboard/crawlers")
-      .then((response) => {
-        const stream = response.body;
-        const reader = stream!.getReader();
-        const readChunk = () => {
-          reader
-            .read()
-            .then(({ value, done }) => {
-              if (done) {
-                console.log("Stream finished");
-                return;
-              }
-              const chunkString = new TextDecoder().decode(value);
-              try {
-                const resData = JSON.parse(chunkString);
-                let time = new Date(resData.data.time).toLocaleString();
-                setOverviewData((prevData) => ({
-                  ...prevData,
-                  currentTime: time,
-                  allCrawlers: resData.data.all_crawlers,
-                  activeCrawlers: resData.data.active_crawlers,
-                  deactiveCrawlers: resData.data.deactive_crawlers,
-                }));
-              } catch (error) {
-                console.log(error);
-              }
-
-              readChunk();
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        };
-        readChunk();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
-
-  const fetchChartData = () => {
-    fetch("http://127.0.0.1:8001/dashboard/chart")
-      .then((response) => {
-        const stream = response.body;
-        const reader = stream!.getReader();
-        const readChunk = () => {
-          reader
-            .read()
-            .then(({ value, done }) => {
-              if (done) {
-                console.log("Stream finished");
-                return;
-              }
-              const chunkString = new TextDecoder().decode(value);
-              try {
-                const resData = JSON.parse(chunkString);
-                let time = resData.data.time.split("T")[1];
-                let second = Math.floor(+time.split(":")[2]);
-                time =
-                  time.split(":")[0] + ":" + time.split(":")[1] + ":" + second;
-                //@ts-ignore
-                setRequest((prevData) => {
-                  const newData = [...prevData.data, resData.data.all_requests];
-                  const newData1 = [
-                    ...prevData.data1,
-                    resData.data.successful_requests,
-                  ];
-                  const newData2 = [
-                    ...prevData.data2,
-                    resData.data.failed_requests,
-                  ];
-                  const newLabels = [...prevData.labels, time];
-                  newData.splice(0, 1);
-                  newData1.splice(0, 1);
-                  newData2.splice(0, 1);
-                  newLabels.splice(0, 1);
-                  return {
-                    data: newData,
-                    data1: newData1,
-                    data2: newData2,
-                    labels: newLabels,
-                  };
-                });
-                setOverviewData((prevData) => ({
-                  ...prevData,
-                  totalRequests: resData.data.all_requests,
-                  successfullRequests: resData.data.successful_requests,
-                  failedRequests: resData.data.failed_requests,
-                }));
-              } catch (error) {
-                console.log(error);
-              }
-
-              readChunk();
-            })
-            .catch((error) => {
-              console.error(error);
-            });
-        };
-        readChunk();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  };
+    return () => {
+      abortController.abort();
+    };
+  }, [navigate]);
 
   return (
     <div id="index">
